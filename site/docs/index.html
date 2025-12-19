@@ -37,8 +37,7 @@ git commit -m "second"
 unset GITHOOK</pre>
 
 <h2 id="ci">ci/cd and docker</h2>
-<p>hooks are for local development—disable them in CI/CD and containers.</p>
-<p>set the environment variable in your CI config:</p>
+<p>hooks are for local development—disable them in CI/CD and containers with <code>GITHOOK=0</code>:</p>
 <pre># github actions
 env:
   GITHOOK: 0
@@ -49,9 +48,6 @@ variables:
 
 # docker
 ENV GITHOOK=0</pre>
-<p>or prefix your install command:</p>
-<pre>GITHOOK=0 npm install</pre>
-<p>when <code>GITHOOK=0</code> is set, <code>./.githook.sh install</code> exits immediately without configuring hooks.</p>
 
 <h2 id="testing">testing hooks</h2>
 <p>run your hook directly without making a commit:</p>
