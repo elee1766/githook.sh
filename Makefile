@@ -25,4 +25,4 @@ test: build
 	@sh test/run.sh
 
 site-preview:
-	caddy file-server --root site
+	caddy file-server --root site --listen :8283
