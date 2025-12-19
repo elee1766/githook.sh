@@ -22,7 +22,6 @@
 <pre>curl -fsS https://githook.sh | sh</pre>
 <p>or with wget:</p>
 <pre>wget -qO- https://githook.sh | sh</pre>
-<p>if package.json exists, a "prepare" script is added automatically.</p>
 <h2>manual setup</h2>
 <pre>curl -fsS https://githook.sh -o githook.sh
 chmod +x githook.sh
@@ -34,8 +33,8 @@ chmod +x githook.sh
 <h2>adding hooks</h2>
 <p>create executable scripts in .githook/ (e.g. .githook/pre-commit)</p>
 <h2>makefile integration</h2>
-<pre>.PHONY: init
-init:
+<pre>.PHONY: prepare
+prepare:
 	./githook.sh install</pre>
 <h2>environment variables</h2>
 <pre>GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)
