@@ -1,6 +1,6 @@
 # [githook.sh](https://githook.sh)
 
-simple lightweight git hooks. portable, small, and easy. inspired by [husky](https://github.com/typicode/husky).
+simple lightweight git hooks. portable, small[,](https://www.youtube.com/watch?v=P_i1xk07o4g) and easy. inspired by [husky](https://github.com/typicode/husky).
 
 ## quick install
 
