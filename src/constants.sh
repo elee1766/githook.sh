@@ -1,6 +1,6 @@
 # constants
 
-GITHOOK_VERSION="0.1.11"
+GITHOOK_VERSION="0.1.12"
 GITHOOK_API_URL="https://githook.sh"
 GITHOOK_DIR=".githook"
 GITHOOK_INTERNAL_DIR=".githook/_"
