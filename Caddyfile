@@ -1,6 +1,4 @@
 # Caddyfile for githook.sh
-# Root path: browsers get HTML, curl/wget get the script
-# All other paths: serve files normally
 
 {
 	admin off
@@ -11,47 +9,35 @@
 	root * /srv/site
 
 	# Health check
-	handle /health {
-		respond "OK" 200
-	}
+	respond /health "OK" 200
 
-	# /source always returns the script
-	handle /source {
+	# /.githook.sh always returns the script as text
+	@script path /.githook.sh
+	handle @script {
 		rewrite * /githook.sh
 		header Content-Type "text/plain; charset=utf-8"
 		file_server
 	}
 
-	# Root path only: browsers vs curl/wget
-	handle / {
-		# ?source query param forces script download
-		@source query source=*
-		handle @source {
-			rewrite * /githook.sh
-			header Content-Type "text/plain; charset=utf-8"
-			file_server
-		}
-		# Detect browsers - they all include Mozilla in User-Agent
-		@browser header_regexp User-Agent (?i)Mozilla
-
-		# Browsers get HTML
-		handle @browser {
-			rewrite * /index.html
-			file_server
-		}
-
-		# Everything else (curl, wget, etc.) gets the script
-		handle {
-			rewrite * /githook.sh
-			header Content-Type "text/plain; charset=utf-8"
-			file_server
-		}
+	# Root path: browsers get HTML, curl/wget get script
+	@rootbrowser {
+		path /
+		header_regexp User-Agent (?i)Mozilla
 	}
-
-	# All other paths: serve files normally
-	handle {
+	handle @rootbrowser {
+		rewrite * /index.html
 		file_server
 	}
+
+	@root path /
+	handle @root {
+		rewrite * /githook.sh
+		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+
+	# Everything else: serve files
+	file_server
 
 	log {
 		output stdout
