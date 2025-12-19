@@ -15,8 +15,22 @@
 		respond "OK" 200
 	}
 
+	# /source always returns the script
+	handle /source {
+		rewrite * /githook.sh
+		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+
 	# Root path only: browsers vs curl/wget
 	handle / {
+		# ?source query param forces script download
+		@source query source=*
+		handle @source {
+			rewrite * /githook.sh
+			header Content-Type "text/plain; charset=utf-8"
+			file_server
+		}
 		# Detect browsers - they all include Mozilla in User-Agent
 		@browser header_regexp User-Agent (?i)Mozilla
 
