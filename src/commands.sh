@@ -70,12 +70,13 @@ githook_cmd_install() {
     # create shared hook runner
     cat > "$_git_root/$GITHOOK_INTERNAL_DIR/h" << 'HOOK'
 #!/bin/sh
-[ -f "$HOME/.config/githook/init.sh" ] && . "$HOME/.config/githook/init.sh"
 [ "$GITHOOK" = "2" ] && set -x
-[ "$GITHOOK" = "0" ] && exit 0
 n=$(basename "$0")
 h=$(dirname "$(dirname "$0")")/$n
 [ ! -f "$h" ] && exit 0
+[ -f "$HOME/.config/githook/init.sh" ] && . "$HOME/.config/githook/init.sh"
+[ "$GITHOOK" = "0" ] && exit 0
+export PATH="node_modules/.bin:$PATH"
 "$h" "$@"
 c=$?
 [ $c != 0 ] && echo "githook - $n failed (code $c)"
