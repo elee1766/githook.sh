@@ -10,9 +10,10 @@
 set -e
 # constants
 
-GITHOOK_VERSION="0.1.7"
+GITHOOK_VERSION="0.1.8"
 GITHOOK_API_URL="https://githook.sh"
-GITHOOK_HOOKS_DIR=".githook"
+GITHOOK_DIR=".githook"
+GITHOOK_INTERNAL_DIR=".githook/_"
 
 GITHOOK_SUPPORTED_HOOKS="applypatch-msg pre-applypatch post-applypatch pre-commit \
 prepare-commit-msg commit-msg post-commit pre-rebase post-checkout \
@@ -28,10 +29,43 @@ githook_is_truthy() {
     case "$1" in 1|true|True|TRUE|yes|Yes|YES|on|On|ON) return 0 ;; *) return 1 ;; esac
 }
 githook_is_debug_enabled() { githook_is_truthy "${GITHOOK_DEBUG:-}"; }
-githook_is_disabled() { githook_is_truthy "${GITHOOK_DISABLE:-}"; }
+githook_is_disabled() { [ "${GITHOOK:-}" = "0" ]; }
 
 githook_is_valid_hook() {
     case " $GITHOOK_SUPPORTED_HOOKS " in *" $1 "*) return 0 ;; *) return 1 ;; esac
+}
+# git helpers
+
+githook_check_git_repository() {
+    if ! git rev-parse --git-dir >/dev/null 2>&1; then
+        githook_error "not a git repository"
+    fi
+    git rev-parse --show-toplevel
+}
+# version comparison (returns: 0 if equal, 1 if v1 > v2, 2 if v1 < v2)
+githook_version_compare() {
+    _v1="${1#v}" _v2="${2#v}"
+    [ "$_v1" = "$_v2" ] && return 0
+    _m1="${_v1%%.*}" _r1="${_v1#*.}" _n1="${_r1%%.*}" _p1="${_r1#*.}"
+    _m2="${_v2%%.*}" _r2="${_v2#*.}" _n2="${_r2%%.*}" _p2="${_r2#*.}"
+    [ "$_m1" -gt "$_m2" ] 2>/dev/null && return 1
+    [ "$_m1" -lt "$_m2" ] 2>/dev/null && return 2
+    [ "$_n1" -gt "$_n2" ] 2>/dev/null && return 1
+    [ "$_n1" -lt "$_n2" ] 2>/dev/null && return 2
+    [ "$_p1" -gt "$_p2" ] 2>/dev/null && return 1
+    [ "$_p1" -lt "$_p2" ] 2>/dev/null && return 2
+    return 0
+}
+# file downloader with fallback from curl to wget
+githook_download_file() {
+    _url="$1" _output="$2"
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$_url" -o "$_output"
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q "$_url" -O "$_output"
+    else
+        githook_error "curl or wget required"
+    fi
 }
 # git helpers
 
@@ -112,20 +146,48 @@ githook_cmd_init() {
 }
 
 githook_cmd_install() {
-    githook_is_disabled && githook_debug "skipping install (GITHOOK_DISABLE is set)" && exit 0
+    githook_is_disabled && githook_debug "skipping install (GITHOOK=0)" && exit 0
     _git_root="$(githook_check_git_repository)"
     githook_info "installing git hooks..."
 
     _existing="$(git config core.hooksPath 2>/dev/null || true)"
-    if [ -n "$_existing" ] && [ "$_existing" != "$GITHOOK_HOOKS_DIR" ]; then
+    if [ -n "$_existing" ] && [ "$_existing" != "$GITHOOK_INTERNAL_DIR" ] && [ "$_existing" != "$GITHOOK_DIR" ]; then
         githook_warn "core.hooksPath already set to: $_existing"
-        printf "override with $GITHOOK_HOOKS_DIR? [y/N] " && read -r _response
+        printf "override with $GITHOOK_INTERNAL_DIR? [y/N] " && read -r _response
         case "$_response" in [yY]|[yY][eE][sS]) ;; *) githook_error "cancelled" ;; esac
     fi
 
-    [ ! -d "$_git_root/$GITHOOK_HOOKS_DIR" ] && mkdir -p "$_git_root/$GITHOOK_HOOKS_DIR"
-    git config core.hooksPath "$GITHOOK_HOOKS_DIR"
-    githook_info "set core.hooksPath=$GITHOOK_HOOKS_DIR"
+    # create directories
+    [ ! -d "$_git_root/$GITHOOK_DIR" ] && mkdir -p "$_git_root/$GITHOOK_DIR"
+    mkdir -p "$_git_root/$GITHOOK_INTERNAL_DIR"
+
+    # create .gitignore to exclude _/ from version control
+    echo "*" > "$_git_root/$GITHOOK_INTERNAL_DIR/.gitignore"
+
+    # create shared hook runner
+    cat > "$_git_root/$GITHOOK_INTERNAL_DIR/h" << 'HOOK'
+#!/bin/sh
+[ "$GITHOOK" = "2" ] && set -x
+[ "$GITHOOK" = "0" ] && exit 0
+n=$(basename "$0")
+h=$(dirname "$(dirname "$0")")/$n
+[ ! -f "$h" ] && exit 0
+sh -e "$h" "$@"
+c=$?
+[ $c != 0 ] && echo "githook - $n failed (code $c)"
+[ $c = 127 ] && echo "githook - command not found in PATH=$PATH"
+exit $c
+HOOK
+
+    # create wrapper for each supported hook
+    for _hook in $GITHOOK_SUPPORTED_HOOKS; do
+        echo '#!/bin/sh
+. "$(dirname "$0")/h"' > "$_git_root/$GITHOOK_INTERNAL_DIR/$_hook"
+        chmod +x "$_git_root/$GITHOOK_INTERNAL_DIR/$_hook"
+    done
+
+    git config core.hooksPath "$GITHOOK_INTERNAL_DIR"
+    githook_info "set core.hooksPath=$GITHOOK_INTERNAL_DIR"
 }
 
 githook_cmd_uninstall() {
@@ -133,7 +195,9 @@ githook_cmd_uninstall() {
     githook_info "uninstalling..."
     git config --unset core.hooksPath 2>/dev/null || true
     githook_info "removed core.hooksPath"
-    [ -d "$_git_root/$GITHOOK_HOOKS_DIR" ] && githook_info "kept $GITHOOK_HOOKS_DIR/ (your scripts are still there)"
+    # remove internal wrapper directory
+    [ -d "$_git_root/$GITHOOK_INTERNAL_DIR" ] && rm -rf "$_git_root/$GITHOOK_INTERNAL_DIR" && githook_info "removed $GITHOOK_INTERNAL_DIR/"
+    [ -d "$_git_root/$GITHOOK_DIR" ] && githook_info "kept $GITHOOK_DIR/ (your scripts are still there)"
     githook_info "reinstall with: ./.githook.sh install"
 }
 
@@ -189,8 +253,8 @@ githook_cmd_help() { _h='# .githook.sh - a single-file, zero-dependency git hook
   prepare: ; ./.githook.sh install
 
 ## environment variables
-  GITHOOK_DISABLE=1  skip hooks (useful for ci)
-  GITHOOK_DEBUG=1    show debug output
+  GITHOOK=0        skip hooks (useful for ci)
+  GITHOOK_DEBUG=1  show debug output
 
 ## more info
   https://githook.sh/docs

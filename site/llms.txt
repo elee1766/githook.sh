@@ -48,15 +48,15 @@ git push --no-verify
 
 to disable all hooks for multiple commands:
 ```
-GITHOOK_DISABLE=1 git commit -m "skip"
+GITHOOK=0 git commit -m "skip"
 ```
 
 or export it for your session:
 ```
-export GITHOOK_DISABLE=1
+export GITHOOK=0
 git commit -m "first"
 git commit -m "second"
-unset GITHOOK_DISABLE
+unset GITHOOK
 ```
 
 ## ci/cd and docker
@@ -67,24 +67,24 @@ set the environment variable in your CI config:
 ```yaml
 # github actions
 env:
-  GITHOOK_DISABLE: 1
+  GITHOOK: 0
 
 # gitlab ci
 variables:
-  GITHOOK_DISABLE: "1"
+  GITHOOK: "0"
 ```
 
 ```dockerfile
 # docker
-ENV GITHOOK_DISABLE=1
+ENV GITHOOK=0
 ```
 
 or prefix your install command:
 ```
-GITHOOK_DISABLE=1 npm install
+GITHOOK=0 npm install
 ```
 
-when `GITHOOK_DISABLE=1` is set, `./.githook.sh install` exits immediately without configuring hooks.
+when `GITHOOK=0` is set, `./.githook.sh install` exits immediately without configuring hooks.
 
 ## testing hooks
 

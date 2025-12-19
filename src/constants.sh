@@ -2,7 +2,8 @@
 
 GITHOOK_VERSION="0.1.8"
 GITHOOK_API_URL="https://githook.sh"
-GITHOOK_HOOKS_DIR=".githook"
+GITHOOK_DIR=".githook"
+GITHOOK_INTERNAL_DIR=".githook/_"
 
 GITHOOK_SUPPORTED_HOOKS="applypatch-msg pre-applypatch post-applypatch pre-commit \
 prepare-commit-msg commit-msg post-commit pre-rebase post-checkout \

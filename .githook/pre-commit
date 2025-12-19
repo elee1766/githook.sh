@@ -1,2 +1,2 @@
 #!/bin/sh
-echo "precommit hook gmorning"
+echo "hook ran!"

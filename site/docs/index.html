@@ -28,30 +28,30 @@ chmod +x .githook/pre-commit</pre>
 <pre>git commit --no-verify -m "wip"
 git push --no-verify</pre>
 <p>to disable all hooks for multiple commands:</p>
-<pre>GITHOOK_DISABLE=1 git commit -m "skip"
-GITHOOK_DISABLE=1 git push</pre>
+<pre>GITHOOK=0 git commit -m "skip"
+GITHOOK=0 git push</pre>
 <p>or export it for your session:</p>
-<pre>export GITHOOK_DISABLE=1
+<pre>export GITHOOK=0
 git commit -m "first"
 git commit -m "second"
-unset GITHOOK_DISABLE</pre>
+unset GITHOOK</pre>
 
 <h2 id="ci">ci/cd and docker</h2>
 <p>hooks are for local development—disable them in CI/CD and containers.</p>
 <p>set the environment variable in your CI config:</p>
 <pre># github actions
 env:
-  GITHOOK_DISABLE: 1
+  GITHOOK: 0
 
 # gitlab ci
 variables:
-  GITHOOK_DISABLE: "1"
+  GITHOOK: "0"
 
 # docker
-ENV GITHOOK_DISABLE=1</pre>
+ENV GITHOOK=0</pre>
 <p>or prefix your install command:</p>
-<pre>GITHOOK_DISABLE=1 npm install</pre>
-<p>when <code>GITHOOK_DISABLE=1</code> is set, <code>./.githook.sh install</code> exits immediately without configuring hooks.</p>
+<pre>GITHOOK=0 npm install</pre>
+<p>when <code>GITHOOK=0</code> is set, <code>./.githook.sh install</code> exits immediately without configuring hooks.</p>
 
 <h2 id="testing">testing hooks</h2>
 <p>run your hook directly without making a commit:</p>
@@ -132,12 +132,20 @@ fi</pre>
 <p>also remove the prepare script from package.json if you added one.</p>
 
 <h2 id="how">how it works</h2>
-<p>githook.sh uses git's native <code>core.hooksPath</code> config to redirect hooks:</p>
-<pre>git config core.hooksPath .githook</pre>
-<p>this tells git to look for hooks in <code>.githook/</code> instead of <code>.git/hooks/</code>.</p>
+<p>githook.sh uses git's native <code>core.hooksPath</code> config:</p>
+<pre>git config core.hooksPath .githook/_</pre>
+<p>the structure is:</p>
+<pre>.githook/
+  _/          # internal wrappers (git-ignored, created by install)
+    h         # shared hook runner
+    pre-commit, commit-msg, ...
+  pre-commit  # your hook scripts
+  commit-msg
+  ...</pre>
+<p>when git runs a hook, it calls the wrapper in <code>_/</code>, which checks <code>GITHOOK=0</code> and then runs your script from the parent directory.</p>
 <p>benefits:</p>
 <p>• hooks are version-controlled (committed to repo)</p>
-<p>• no symlinks or copying files into .git/</p>
+<p>• <code>GITHOOK=0</code> skips all hooks without <code>--no-verify</code></p>
 <p>• works with any project type (not just npm)</p>
 <p>• zero dependencies—just a shell script</p>
 <p>each developer must run <code>./.githook.sh install</code> once after cloning because git config is local to each clone.</p>

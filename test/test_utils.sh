@@ -20,13 +20,13 @@ assert_false githook_is_valid_hook 'pre-commit$(whoami)'
 
 echo ""
 echo "is_disabled:"
-GITHOOK_DISABLE=1
+GITHOOK=0
 assert_true githook_is_disabled
-GITHOOK_DISABLE=true
-assert_true githook_is_disabled
-GITHOOK_DISABLE=
+GITHOOK=1
 assert_false githook_is_disabled
-unset GITHOOK_DISABLE
+GITHOOK=
+assert_false githook_is_disabled
+unset GITHOOK
 assert_false githook_is_disabled
 
 echo ""
