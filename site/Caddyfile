@@ -26,8 +26,7 @@
 	}
 
 	# docs page
-	handle /docs {
-		rewrite * /docs.html
+	handle /docs* {
 		file_server
 	}
 

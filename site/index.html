@@ -9,7 +9,8 @@
 </head>
 <body>
 <h1>githook.sh</h1>
-<p>a single-file, zero-dependency git hooks manager. <a href="/docs">docs</a></p>
+<p>a single-file, zero-dependency git hooks manager.</p>
+<p><a href="/docs">docs</a></p>
 <h2>quick install</h2>
 <pre>curl -sSL https://githook.sh | sh</pre>
 <p>or with wget:</p>
@@ -24,7 +25,11 @@ chmod +x .githook.sh
 ./.githook.sh check         check for updates
 ./.githook.sh update        download latest version</pre>
 <h2>adding hooks</h2>
-<p>create executable scripts in .githook/ (e.g. .githook/pre-commit)</p>
+<p>create executable scripts in .githook/ named after the git hook:</p>
+<pre>echo '#!/bin/sh
+npm test' > .githook/pre-commit
+chmod +x .githook/pre-commit</pre>
+<p>scripts must be executable and start with a shebang. see <a href="/docs">docs</a> for more examples.</p>
 <h2>npm/pnpm/bun integration</h2>
 <pre>"prepare": "./.githook.sh install"</pre>
 <h2>makefile integration</h2>
