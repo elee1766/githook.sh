@@ -1,13 +1,15 @@
 # main entry point
 
 githook_main() {
-    # default: init if not installed, otherwise help
+    # detect if running via pipe (curl | sh)
+    case "${0##*/}" in sh|bash|dash|ash|zsh|ksh) _piped=1 ;; *) _piped=0 ;; esac
+
+    # default: piped always runs init, otherwise help if installed
     if [ -z "${1:-}" ]; then
-        _git_root="$(git rev-parse --show-toplevel 2>/dev/null || echo "")"
-        if [ -n "$_git_root" ] && [ -f "$_git_root/.githook.sh" ]; then
-            _command="help"
-        else
+        if [ "$_piped" -eq 1 ]; then
             _command="init"
+        else
+            _command="help"
         fi
     else
         _command="$1"
@@ -17,6 +19,7 @@ githook_main() {
         init)      githook_cmd_init ;;
         install)   githook_cmd_install ;;
         uninstall) githook_cmd_uninstall ;;
+        migrate)   case "${2:-}" in husky) githook_cmd_migrate_husky ;; *) githook_error "usage: ./.githook.sh migrate husky" ;; esac ;;
         check)     githook_cmd_check ;;
         update)    githook_cmd_update ;;
         version)   githook_cmd_version ;;

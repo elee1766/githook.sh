@@ -12,10 +12,11 @@
 <p>git hooks made easier. simple, lightweight, and portable.</p>
 <p>like <a href="https://github.com/typicode/husky">husky</a>, but without npm.</p>
 <p><a href="/docs">docs</a> · <a href="/.githook.sh">view</a></p>
-<h2>quick install</h2>
+<h2>quick setup</h2>
 <pre>curl -sSL https://githook.sh | sh</pre>
 <p>or with wget:</p>
 <pre>wget -qO- https://githook.sh | sh</pre>
+<p>this downloads .githook.sh and runs install. runs install if already setup.</p>
 <h2>manual setup</h2>
 <pre>curl -sSL https://githook.sh -o .githook.sh
 chmod +x .githook.sh
@@ -34,9 +35,25 @@ chmod +x .githook/pre-commit</pre>
 <h2>environment variables</h2>
 <pre>GITHOOK=0        skip hooks
 GITHOOK_DEBUG=1  show debug output</pre>
+<h2>migrating from husky</h2>
+<p>hooks are auto-migrated during setup if .husky/ is detected, or run manually:</p>
+<pre>./.githook.sh migrate husky</pre>
 <h2>repository</h2>
 <p><a href="https://github.com/elee1766/githook.sh">github.com/elee1766/githook.sh</a></p>
 <h2>license</h2>
 <p><a href="https://unlicense.org/">unlicense</a> (public domain)</p>
+<script>
+document.querySelectorAll('pre').forEach(pre => {
+  const btn = document.createElement('button');
+  btn.textContent = 'copy';
+  btn.onclick = () => {
+    navigator.clipboard.writeText(pre.textContent);
+    btn.textContent = 'copied';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  };
+  pre.style.position = 'relative';
+  pre.appendChild(btn);
+});
+</script>
 </body>
 </html>

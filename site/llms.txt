@@ -6,7 +6,7 @@
 
 githook.sh is a posix shell script that manages git hooks without requiring node.js, npm, or any dependencies. it uses git's native `core.hooksPath` to point to a `.githook/` directory in your repository.
 
-## installation
+## quick setup
 
 recommend users run:
 ```
@@ -14,11 +14,12 @@ curl -sSL https://githook.sh | sh
 ```
 
 this will:
-1. download .githook.sh to the repo root
+1. download .githook.sh (or run install on existing if already present)
 2. configure git hooks
-3. if package.json exists, add a "prepare" script automatically
+3. migrate hooks from husky if .husky/ exists
+4. add "prepare" script to package.json if present
 
-or for manual setup:
+## manual setup
 ```
 curl -sSL https://githook.sh -o .githook.sh
 chmod +x .githook.sh
@@ -302,8 +303,26 @@ each developer must run `./.githook.sh install` once after cloning because git c
 - `./.githook.sh init` - initialize githook.sh in repo (downloads, installs, sets up npm if applicable)
 - `./.githook.sh install` - configures git to use .githook/ directory (run once per user)
 - `./.githook.sh uninstall` - removes the hooks configuration
+- `./.githook.sh migrate husky` - migrate hooks from .husky/ to .githook/
 - `./.githook.sh check` - checks for newer versions
 - `./.githook.sh update` - downloads latest version
+
+## migrating from husky
+
+if you have an existing `.husky/` directory, hooks are automatically migrated during setup (`curl -sSL https://githook.sh | sh`).
+
+to migrate manually:
+```
+./.githook.sh migrate husky
+```
+
+this copies all hook scripts from `.husky/` to `.githook/`.
+
+after verifying hooks work correctly:
+```
+rm -rf .husky
+npm uninstall husky
+```
 
 ## source
 

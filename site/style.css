@@ -6,7 +6,9 @@ h1::before { content: "# "; }
 h2 { font-size: 1.1em; font-weight: bold; margin-top: 1.5em; }
 h2::before { content: "## "; }
 pre, code { background: #f5f5f5; }
-pre { margin: 0.4em 0 0.4em 4ch; padding: 0.4em 0.6em; overflow-x: auto; }
+pre { margin: 0.4em 0 0.4em 4ch; padding: 0.4em 0.6em; overflow-x: auto; position: relative; }
+pre button { position: absolute; top: 0.3em; right: 0.3em; background: #ddd; border: none; padding: 0.2em 0.5em; cursor: pointer; font-size: 0.8em; }
+pre button:hover { background: #ccc; }
 code { padding: 0.1em 0.3em; }
 p { margin: 0.4em 0; }
 a { color: inherit; }

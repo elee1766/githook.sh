@@ -11,9 +11,9 @@ githook_cmd_init() {
     fi
 
     if [ -f "$_target_path" ]; then
-        githook_warn ".githook.sh already exists in repo root"
-        printf "overwrite? [y/N] " && read -r _response
-        case "$_response" in [yY]|[yY][eE][sS]) ;; *) githook_info "cancelled"; return ;; esac
+        githook_info ".githook.sh already exists, running install..."
+        "$_target_path" install
+        return
     fi
 
     if [ "$_piped" -eq 1 ]; then
@@ -24,6 +24,11 @@ githook_cmd_init() {
     fi
     chmod +x "$_target_path"
     githook_info "installed to $_target_path"
+
+    # auto-migrate from husky if detected
+    if [ -d "$_git_root/.husky" ]; then
+        githook_cmd_migrate_husky
+    fi
 
     githook_cmd_install
     echo ""
@@ -70,7 +75,7 @@ githook_cmd_install() {
 n=$(basename "$0")
 h=$(dirname "$(dirname "$0")")/$n
 [ ! -f "$h" ] && exit 0
-sh -e "$h" "$@"
+"$h" "$@"
 c=$?
 [ $c != 0 ] && echo "githook - $n failed (code $c)"
 [ $c = 127 ] && echo "githook - command not found"
@@ -86,6 +91,32 @@ HOOK
 
     git config core.hooksPath "$GITHOOK_INTERNAL_DIR"
     githook_info "set core.hooksPath=$GITHOOK_INTERNAL_DIR"
+}
+
+githook_cmd_migrate_husky() {
+    _git_root="$(githook_check_git_repository)"
+    _husky_dir="$_git_root/.husky"
+    [ ! -d "$_husky_dir" ] && githook_error ".husky directory not found"
+
+    githook_info "migrating hooks from husky..."
+    [ ! -d "$_git_root/$GITHOOK_DIR" ] && mkdir -p "$_git_root/$GITHOOK_DIR"
+
+    _migrated=0
+    for _hook in $GITHOOK_SUPPORTED_HOOKS; do
+        if [ -f "$_husky_dir/$_hook" ]; then
+            cp "$_husky_dir/$_hook" "$_git_root/$GITHOOK_DIR/$_hook"
+            chmod +x "$_git_root/$GITHOOK_DIR/$_hook"
+            githook_info "  migrated $_hook"
+            _migrated=$((_migrated + 1))
+        fi
+    done
+
+    if [ $_migrated -eq 0 ]; then
+        githook_info "no hooks found to migrate"
+    else
+        githook_info "migrated $_migrated hook(s)"
+        githook_info "after verifying hooks work, run: rm -rf .husky"
+    fi
 }
 
 githook_cmd_uninstall() {
@@ -131,9 +162,9 @@ githook_cmd_version() {
     echo "githook.sh $GITHOOK_VERSION"
 }
 
-githook_cmd_help() { _h='# .githook.sh - a single-file, zero-dependency git hooks manager.
+githook_cmd_help() { _h='# .githook.sh - git hooks made easier.
 
-## quick install
+## quick setup
   curl -sSL https://githook.sh | sh
   wget -qO- https://githook.sh | sh
 
@@ -142,10 +173,11 @@ githook_cmd_help() { _h='# .githook.sh - a single-file, zero-dependency git hook
   chmod +x .githook.sh && ./.githook.sh install
 
 ## commands
-  install       set up git hooks (run once per clone)
-  uninstall     remove git hooks configuration
-  check         check for updates
-  update        download latest version
+  install        configure git hooks (run once per clone)
+  uninstall      remove git hooks configuration
+  migrate husky  migrate hooks from husky
+  check          check for updates
+  update         download latest version
 
 ## adding hooks
   create executable scripts in .githook/ (e.g. .githook/pre-commit)
