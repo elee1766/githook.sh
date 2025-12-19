@@ -42,18 +42,6 @@ GITHOOK_DEBUG=1  show debug output</pre>
 <p><a href="https://github.com/elee1766/githook.sh">github.com/elee1766/githook.sh</a></p>
 <h2>license</h2>
 <p><a href="https://unlicense.org/">unlicense</a> (public domain)</p>
-<script>
-document.querySelectorAll('pre').forEach(pre => {
-  const btn = document.createElement('button');
-  btn.textContent = 'copy';
-  btn.onclick = () => {
-    navigator.clipboard.writeText(pre.textContent);
-    btn.textContent = 'copied';
-    setTimeout(() => btn.textContent = 'copy', 1500);
-  };
-  pre.style.position = 'relative';
-  pre.appendChild(btn);
-});
-</script>
+<script src="/copy.js"></script>
 </body>
 </html>
