@@ -8,6 +8,9 @@ primary_region = 'ord'
 
 [build]
 
+[deploy]
+  strategy = 'bluegreen'
+
 [http_service]
   internal_port = 80
   force_https = true
