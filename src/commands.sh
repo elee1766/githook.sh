@@ -160,31 +160,38 @@ githook_cmd_version() {
 }
 
 githook_cmd_help() {
-    cat <<'EOF'
-# githook.sh
+    _help='# githook.sh
 
 a single-file, zero-dependency git hooks manager.
 
 ## quick install
 
-    curl -fsS https://githook.sh | sh
+```sh
+curl -fsS https://githook.sh | sh
+```
 
 or with wget:
 
-    wget -qO- https://githook.sh | sh
+```sh
+wget -qO- https://githook.sh | sh
+```
 
 ## manual setup
 
-    curl -fsS https://githook.sh -o githook.sh
-    chmod +x githook.sh
-    ./githook.sh install
+```sh
+curl -fsS https://githook.sh -o githook.sh
+chmod +x githook.sh
+./githook.sh install
+```
 
 ## commands
 
-    ./githook.sh install              set up git hooks (run once per user)
-    ./githook.sh uninstall            remove git hooks configuration
-    ./githook.sh check                check for updates
-    ./githook.sh update               download latest version
+```
+./githook.sh install       set up git hooks (run once per clone)
+./githook.sh uninstall     remove git hooks configuration
+./githook.sh check         check for updates
+./githook.sh update        download latest version
+```
 
 ## adding hooks
 
@@ -192,32 +199,45 @@ create executable scripts in .githook/ (e.g. .githook/pre-commit)
 
 ## npm/pnpm/bun integration
 
-    npm pkg set scripts.prepare="./githook.sh install"
+```json
+"prepare": "./githook.sh install"
+```
 
 ## makefile integration
 
-    .PHONY: prepare
-    prepare:
-    	./githook.sh install
+```makefile
+.PHONY: prepare
+prepare:
+	./githook.sh install
+```
 
 ## environment variables
 
-    GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)
-    GITHOOK_DEBUG=1      show debug output
+```
+GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)
+GITHOOK_DEBUG=1      show debug output
+```
 
 ## supported hooks
 
-    pre-commit, pre-push, commit-msg, prepare-commit-msg,
-    post-commit, post-merge, pre-rebase, post-checkout,
-    post-rewrite, pre-auto-gc, applypatch-msg,
-    pre-applypatch, post-applypatch
+```
+pre-commit, pre-push, commit-msg, prepare-commit-msg,
+post-commit, post-merge, pre-rebase, post-checkout,
+post-rewrite, pre-auto-gc, applypatch-msg,
+pre-applypatch, post-applypatch
+```
 
 ## source
 
-    https://github.com/elee1766/githook.sh
+https://github.com/elee1766/githook.sh
 
 ## license
 
-    unlicense (public domain)
-EOF
+unlicense (public domain)'
+
+    if command -v glow >/dev/null 2>&1; then
+        echo "$_help" | glow -s dark -
+    else
+        echo "$_help"
+    fi
 }

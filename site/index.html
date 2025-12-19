@@ -12,6 +12,8 @@
         h2::before { content: "## "; }
         h2 { margin-top: 1em; }
         pre { margin-left: 4ch; }
+        pre::before { content: "```\A"; white-space: pre; }
+        pre::after { content: "\A```"; white-space: pre; }
         a { color: inherit; }
     </style>
 </head>
@@ -27,14 +29,14 @@
 chmod +x githook.sh
 ./githook.sh install</pre>
 <h2>commands</h2>
-<pre>./githook.sh install              set up git hooks (run once per clone)
-./githook.sh uninstall            remove git hooks configuration
-./githook.sh check                check for updates
-./githook.sh update               download latest version</pre>
+<pre>./githook.sh install       set up git hooks (run once per clone)
+./githook.sh uninstall     remove git hooks configuration
+./githook.sh check         check for updates
+./githook.sh update        download latest version</pre>
 <h2>adding hooks</h2>
 <p>create executable scripts in .githook/ (e.g. .githook/pre-commit)</p>
 <h2>npm/pnpm/bun integration</h2>
-<pre>npm pkg set scripts.prepare="./githook.sh install"</pre>
+<pre>"prepare": "./githook.sh install"</pre>
 <h2>makefile integration</h2>
 <pre>.PHONY: prepare
 prepare:
