@@ -20,7 +20,8 @@
 <div>
 <b>integration:</b>
 <a href="#ci">ci/cd</a> ·
-<a href="#npm">npm</a> ·
+<a href="#package-json">package.json</a> ·
+<a href="#makefile">makefile</a> ·
 <a href="#husky">husky</a> ·
 <a href="#languages">languages</a>
 </div>
@@ -98,13 +99,20 @@ variables:
 # docker
 ENV GITHOOK=0</pre>
 
-<h2 id="npm">package.json integration</h2>
+<h2 id="package-json">package.json integration</h2>
 <p>auto-install hooks when developers run <code>npm install</code>:</p>
 <p><strong>npm / pnpm / bun:</strong></p>
 <pre>npm pkg set scripts.prepare="./.githook.sh install"</pre>
 <p><strong>yarn:</strong></p>
 <pre>npm pkg set scripts.postinstall="./.githook.sh install"</pre>
 <p>yarn uses <code>postinstall</code> instead of <code>prepare</code>.</p>
+
+<h2 id="makefile">makefile integration</h2>
+<p>add a target for installing hooks:</p>
+<pre>.PHONY: prepare
+prepare:
+	./.githook.sh install</pre>
+<p>run <code>make prepare</code> after cloning.</p>
 
 <h2 id="husky">migrating from husky</h2>
 <p>hooks are automatically migrated during setup if <code>.husky/</code> exists. to migrate manually:</p>
