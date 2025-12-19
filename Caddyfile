@@ -22,7 +22,7 @@
 	# Root path: browsers get HTML, curl/wget get script
 	@rootbrowser {
 		path /
-		header_regexp User-Agent (?i)Mozilla
+		header_regexp User-Agent (?i)(Mozilla|Lynx)
 	}
 	handle @rootbrowser {
 		rewrite * /index.html
