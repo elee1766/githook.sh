@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 env:
-  GITHOOK_DISABLE: 1
+  GITHOOK: 0
 
 jobs:
   release:

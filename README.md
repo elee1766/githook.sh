@@ -36,7 +36,7 @@ there is no real innovation here. basically everything is copied from husky.
 
 ## contribution info
 
-so there is very primative bundling, aka we cat all the files together to build.
+so there is very primative bundler, aka we cat all the files together to build lol.
 
 happy to accept any contributions.
 
