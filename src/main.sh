@@ -16,11 +16,9 @@ githook_main() {
     case "$_command" in
         init)      githook_cmd_init ;;
         install)   githook_cmd_install ;;
-        add)       shift; githook_cmd_add "$@" ;;
         uninstall) githook_cmd_uninstall ;;
         check-update) githook_cmd_check_update ;;
         version)   githook_cmd_version ;;
-        status)    githook_cmd_status ;;
         help|--help|-h) githook_cmd_help ;;
         *) githook_error "unknown command: $_command (try ./githook.sh help)" ;;
     esac

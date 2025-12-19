@@ -24,21 +24,15 @@
 <pre>wget -qO- https://githook.sh | sh</pre>
 <p>if package.json exists, a "prepare" script is added automatically.</p>
 <h2>manual setup</h2>
-<pre># download the script
-curl -fsS https://githook.sh -o githook.sh
+<pre>curl -fsS https://githook.sh -o githook.sh
 chmod +x githook.sh
-
-# install hooks
-./githook.sh install
-
-# add your first hook
-./githook.sh add pre-commit "npm test"</pre>
+./githook.sh install</pre>
 <h2>commands</h2>
 <pre>./githook.sh install              set up git hooks (run once per user)
-./githook.sh add &lt;hook&gt; "cmd"     create or append to a hook
-./githook.sh status               show installed hooks
-./githook.sh check-update         check for updates
-./githook.sh uninstall            remove git hooks configuration</pre>
+./githook.sh uninstall            remove git hooks configuration
+./githook.sh check-update         check for updates</pre>
+<h2>adding hooks</h2>
+<p>create executable scripts in .githook/ (e.g. .githook/pre-commit)</p>
 <h2>makefile integration</h2>
 <pre>.PHONY: init
 init:

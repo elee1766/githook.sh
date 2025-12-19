@@ -269,43 +269,6 @@ githook_cmd_install() {
     githook_info "set core.hooksPath=$GITHOOK_HOOKS_DIR"
 }
 
-githook_cmd_add() {
-    _hook_name="$1"
-    _command="$2"
-
-    if [ -z "$_hook_name" ]; then
-        githook_error "hook name required. example: ./githook.sh add pre-commit \"npm test\""
-    fi
-
-    if ! githook_is_valid_hook "$_hook_name"; then
-        githook_error "invalid hook: $_hook_name"
-    fi
-
-    _git_root="$(githook_check_git_repository)"
-    _hooks_dir="$_git_root/$GITHOOK_HOOKS_DIR"
-    _hook_file="$_hooks_dir/$_hook_name"
-
-    [ ! -d "$_hooks_dir" ] && mkdir -p "$_hooks_dir"
-
-    if [ -f "$_hook_file" ]; then
-        if [ -n "$_command" ]; then
-            echo "$_command" >> "$_hook_file"
-            githook_info "appended to $GITHOOK_HOOKS_DIR/$_hook_name"
-        else
-            githook_info "hook exists: $GITHOOK_HOOKS_DIR/$_hook_name"
-        fi
-    else
-        {
-            echo "#!/bin/sh"
-            [ -n "$_command" ] && echo "$_command"
-        } > "$_hook_file"
-        chmod +x "$_hook_file"
-        githook_info "created $GITHOOK_HOOKS_DIR/$_hook_name"
-    fi
-
-    [ -z "$_command" ] && githook_info "edit: $_hook_file"
-}
-
 githook_cmd_uninstall() {
     _git_root="$(githook_check_git_repository)"
     _hooks_dir="$_git_root/$GITHOOK_HOOKS_DIR"
@@ -359,41 +322,6 @@ githook_cmd_version() {
     echo "githook.sh $GITHOOK_VERSION"
 }
 
-githook_cmd_status() {
-    _git_root="$(githook_check_git_repository)"
-    _hooks_dir="$_git_root/$GITHOOK_HOOKS_DIR"
-    _hooks_path="$(git config core.hooksPath 2>/dev/null || echo "(not set)")"
-
-    echo "version: $GITHOOK_VERSION"
-    echo "hooks path: $_hooks_path"
-    echo "hooks dir: $_hooks_dir"
-    echo ""
-
-    if [ "$_hooks_path" = "$GITHOOK_HOOKS_DIR" ]; then
-        echo "status: installed"
-    else
-        echo "status: not installed (run ./githook.sh install)"
-    fi
-
-    echo ""
-    echo "hooks:"
-
-    _found_hooks=0
-    for _hook in $GITHOOK_SUPPORTED_HOOKS; do
-        _user_script="$_hooks_dir/$_hook"
-        if [ -f "$_user_script" ]; then
-            if [ -x "$_user_script" ]; then
-                echo "  $_hook"
-            else
-                echo "  $_hook (not executable)"
-            fi
-            _found_hooks=1
-        fi
-    done
-
-    [ $_found_hooks -eq 0 ] && echo "  (none)"
-}
-
 githook_cmd_help() {
     cat <<EOF
 githook.sh - git hooks manager
@@ -403,16 +331,12 @@ usage: ./githook.sh <command> [arguments]
 commands:
   init                  initialize githook.sh in repo
   install               set up git hooks (run once per user)
-  add <hook> [command]  create or append to a hook
-  status                show status
   uninstall             remove git hooks config
   check-update          check for updates
   version               show version
   help                  show this
 
-quick start:
-  ./githook.sh install
-  ./githook.sh add pre-commit "npm test"
+hooks go in .githook/ (e.g. .githook/pre-commit)
 
 environment:
   GITHOOK_DISABLE=1    skip hooks/install (for ci)
@@ -452,11 +376,9 @@ githook_main() {
     case "$_command" in
         init)      githook_cmd_init ;;
         install)   githook_cmd_install ;;
-        add)       shift; githook_cmd_add "$@" ;;
         uninstall) githook_cmd_uninstall ;;
         check-update) githook_cmd_check_update ;;
         version)   githook_cmd_version ;;
-        status)    githook_cmd_status ;;
         help|--help|-h) githook_cmd_help ;;
         *) githook_error "unknown command: $_command (try ./githook.sh help)" ;;
     esac

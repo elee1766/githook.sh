@@ -19,26 +19,22 @@ if package.json exists, a "prepare" script is added automatically.
 ## manual setup
 
 ```sh
-# download the script
 curl -fsS https://githook.sh -o githook.sh
 chmod +x githook.sh
-
-# install hooks
 ./githook.sh install
-
-# add your first hook
-./githook.sh add pre-commit "npm test"
 ```
 
 ## commands
 
 ```
 ./githook.sh install              set up git hooks (run once per user)
-./githook.sh add <hook> "cmd"     create or append to a hook
-./githook.sh status               show installed hooks
-./githook.sh check-update         check for updates
 ./githook.sh uninstall            remove git hooks configuration
+./githook.sh check-update         check for updates
 ```
+
+## adding hooks
+
+create executable scripts in `.githook/` (e.g. `.githook/pre-commit`)
 
 ## makefile integration
 

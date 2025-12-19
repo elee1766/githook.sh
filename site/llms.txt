@@ -27,12 +27,12 @@ chmod +x githook.sh
 
 ## adding hooks
 
-to add a pre-commit hook:
+create executable scripts in `.githook/` directory:
 ```
-./githook.sh add pre-commit "npm test"
+echo '#!/bin/sh
+npm test' > .githook/pre-commit
+chmod +x .githook/pre-commit
 ```
-
-this creates `.githook/pre-commit` with the command. running add again appends to the existing hook.
 
 ## supported hooks
 
@@ -75,7 +75,5 @@ unlicense (public domain)
 
 - `./githook.sh init` - initialize githook.sh in repo (downloads, installs, sets up npm if applicable)
 - `./githook.sh install` - configures git to use .githook/ directory (run once per user)
-- `./githook.sh add <hook> "command"` - creates or appends to a hook script
-- `./githook.sh status` - shows current hook configuration
-- `./githook.sh check-update` - checks for newer versions
 - `./githook.sh uninstall` - removes the hooks configuration
+- `./githook.sh check-update` - checks for newer versions
