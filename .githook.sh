@@ -181,13 +181,13 @@ githook_cmd_update() {
     _remote="$(githook_download_file "$GITHOOK_API_URL" - 2>/dev/null)" || githook_error "failed to fetch latest version"
     _latest="$(echo "$_remote" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
     case "$_latest" in [0-9]*.[0-9]*.[0-9]*) ;; *) githook_error "invalid remote version: $_latest" ;; esac
-    githook_version_compare "$GITHOOK_VERSION" "$_latest"
-    case $? in 0|1) githook_info "already up to date ($GITHOOK_VERSION)"; return ;; esac
+    _cmp=0; githook_version_compare "$GITHOOK_VERSION" "$_latest" || _cmp=$?
+    case $_cmp in 0|1) githook_info "already up to date ($GITHOOK_VERSION)"; return ;; esac
     githook_info "updating $GITHOOK_VERSION -> $_latest..."
     echo "$_remote" > "$_path"
     chmod +x "$_path"
-    githook_info "updated to $_latest"
-    githook_info "run ./.githook.sh install to update hooks"
+    githook_info "updated to $_latest - run ./.githook.sh install to update hooks"
+    exit 0
 }
 
 githook_cmd_version() {
