@@ -1,8 +1,6 @@
-# githook.sh
+# [githook.sh](https://githook.sh)
 
-it's basically husky. but written as a single script that you can download into your repo.
-
-because it's written in posix shell, it's portable and small. it does very little, i don't really plan for it to do more
+lightweight simple git hooks, zero dependency, portable, and small. inspired by [husky](https://github.com/typicode/husky).
 
 contributions are welcome.
 
