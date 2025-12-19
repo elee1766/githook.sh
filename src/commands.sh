@@ -37,7 +37,8 @@ githook_cmd_init() {
             && githook_info "added prepare script to package.json" \
             || githook_info "tip: add to package.json scripts: \"prepare\": \"./.githook.sh install\""
     else
-        githook_info "note: each user must run ./.githook.sh install after cloning"
+        githook_info "note: each user must run install after cloning:"
+        echo "  ./.githook.sh install"
     fi
 }
 
@@ -115,7 +116,8 @@ githook_cmd_migrate_husky() {
         githook_info "no hooks found to migrate"
     else
         githook_info "migrated $_migrated hook(s)"
-        githook_info "after verifying hooks work, run: rm -rf .husky"
+        githook_info "after verifying, remove husky:"
+        echo "  rm -rf .husky"
     fi
 }
 
@@ -127,25 +129,25 @@ githook_cmd_uninstall() {
     # remove internal wrapper directory
     [ -d "$_git_root/$GITHOOK_INTERNAL_DIR" ] && rm -rf "$_git_root/$GITHOOK_INTERNAL_DIR" && githook_info "removed $GITHOOK_INTERNAL_DIR/"
     [ -d "$_git_root/$GITHOOK_DIR" ] && githook_info "kept $GITHOOK_DIR/ (your scripts are still there)"
-    githook_info "reinstall with: ./.githook.sh install"
+    githook_info "to reinstall:"
+    echo "  ./.githook.sh install"
 }
 
 githook_cmd_check() {
-    githook_info "checking for updates..."
-    githook_info "current: $GITHOOK_VERSION"
     _remote="$(githook_download_file "$GITHOOK_API_URL" - 2>/dev/null)" || githook_error "failed to fetch latest version"
     _latest="$(echo "$_remote" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
     case "$_latest" in [0-9]*.[0-9]*.[0-9]*) ;; *) githook_error "invalid remote version: $_latest" ;; esac
-    githook_info "latest: $_latest"
     githook_version_compare "$GITHOOK_VERSION" "$_latest"
-    case $? in 0) githook_info "up to date" ;; 1) githook_info "ahead of latest" ;; 2) githook_info "update available! run: ./.githook.sh update" ;; esac
+    case $? in
+        2) githook_info "$GITHOOK_VERSION -> $_latest"
+           echo "  ./.githook.sh update" ;;
+    esac
 }
 
 githook_cmd_update() {
     _git_root="$(githook_check_git_repository)"
     _path="$_git_root/.githook.sh"
     [ ! -f "$_path" ] && githook_error ".githook.sh not found in repo root"
-    githook_info "checking for updates..."
     _remote="$(githook_download_file "$GITHOOK_API_URL" - 2>/dev/null)" || githook_error "failed to fetch latest version"
     _latest="$(echo "$_remote" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
     case "$_latest" in [0-9]*.[0-9]*.[0-9]*) ;; *) githook_error "invalid remote version: $_latest" ;; esac
@@ -154,7 +156,9 @@ githook_cmd_update() {
     githook_info "updating $GITHOOK_VERSION -> $_latest..."
     echo "$_remote" > "$_path"
     chmod +x "$_path"
-    githook_info "updated to $_latest - run ./.githook.sh install to update hooks"
+    githook_info "updated to $_latest"
+    githook_info "run install to update hooks:"
+    echo "  ./.githook.sh install"
     exit 0
 }
 
