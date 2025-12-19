@@ -14,7 +14,7 @@ FROM caddy:2-alpine
 
 COPY site/ /srv/site/
 COPY --from=builder /build/githook.sh /srv/site/githook.sh
-COPY site/Caddyfile /etc/caddy/Caddyfile
+COPY Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80
 
