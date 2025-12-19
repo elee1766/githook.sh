@@ -1,5 +1,5 @@
 # Caddyfile for githook.sh
-# CLI tools get the script, everyone else (browsers, crawlers) gets HTML
+# Browsers get HTML, everything else gets the script
 
 {
 	admin off
@@ -9,9 +9,9 @@
 :80 {
 	root * /srv/site
 
-	# Detect CLI tools - serve raw script
-	@cli {
-		header_regexp User-Agent (?i)(curl|wget|httpie|fetch|libfetch|Go-http-client|python-requests|ruby|perl|aria2|axel|lynx|links|w3m|elinks)
+	# Detect browsers - they all include Mozilla in User-Agent
+	@browser {
+		header_regexp User-Agent (?i)Mozilla
 	}
 
 	# Health check
@@ -25,16 +25,16 @@
 		file_server
 	}
 
-	# CLI tools get the raw script
-	handle @cli {
-		rewrite * /githook.sh
-		header Content-Type "text/plain; charset=utf-8"
+	# Browsers get HTML
+	handle @browser {
+		rewrite * /index.html
 		file_server
 	}
 
-	# Everyone else (browsers, crawlers, bots) gets HTML
+	# Everything else (curl, wget, etc.) gets the script
 	handle {
-		rewrite * /index.html
+		rewrite * /githook.sh
+		header Content-Type "text/plain; charset=utf-8"
 		file_server
 	}
 
