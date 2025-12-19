@@ -243,16 +243,27 @@ also remove the prepare script from package.json if you added one.
 
 ## how it works
 
-githook.sh uses git's native `core.hooksPath` config to redirect hooks:
+githook.sh uses git's native `core.hooksPath` config:
 ```
-git config core.hooksPath .githook
+git config core.hooksPath .githook/_
 ```
 
-this tells git to look for hooks in `.githook/` instead of `.git/hooks/`.
+the structure is:
+```
+.githook/
+  _/          # internal wrappers (git-ignored, created by install)
+    h         # shared hook runner
+    pre-commit, commit-msg, ...
+  pre-commit  # your hook scripts
+  commit-msg
+  ...
+```
+
+when git runs a hook, it calls the wrapper in `_/`, which checks `GITHOOK=0` and then runs your script from the parent directory.
 
 benefits:
 - hooks are version-controlled (committed to repo)
-- no symlinks or copying files into .git/
+- `GITHOOK=0` skips all hooks without `--no-verify`
 - works with any project type (not just npm)
 - zero dependencies—just a shell script
 
@@ -260,8 +271,9 @@ each developer must run `./.githook.sh install` once after cloning because git c
 
 ## environment variables
 
-- `GITHOOK_DISABLE=1` - skips hook execution and installation
-- `GITHOOK_DEBUG=1` - enables verbose debug output
+- `GITHOOK=0` - skips hook execution and installation
+- `GITHOOK=2` - enables debug output (set -x)
+- `GITHOOK_DEBUG=1` - enables verbose debug output for githook.sh itself
 
 ## command reference
 
