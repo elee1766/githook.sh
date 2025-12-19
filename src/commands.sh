@@ -1,6 +1,6 @@
 # commands
 
-githook_cmd_setup() {
+githook_cmd_init() {
     _git_root="$(githook_check_git_repository)"
     _target_path="$_git_root/githook.sh"
 
@@ -39,9 +39,26 @@ githook_cmd_setup() {
 
     githook_info "installed to $_target_path"
     echo ""
-    githook_info "next:"
-    githook_info "  ./githook.sh install"
-    githook_info "  ./githook.sh add pre-commit \"npm test\""
+
+    # run install
+    githook_cmd_install
+
+    # try to add npm prepare script if package.json exists
+    if [ -f "$_git_root/package.json" ]; then
+        echo ""
+        if command -v npm >/dev/null 2>&1; then
+            if npm pkg set scripts.prepare="./githook.sh install" 2>/dev/null; then
+                githook_info "added prepare script to package.json"
+            else
+                githook_info "tip: add to package.json scripts: \"prepare\": \"./githook.sh install\""
+            fi
+        else
+            githook_info "tip: add to package.json scripts: \"prepare\": \"./githook.sh install\""
+        fi
+    else
+        echo ""
+        githook_info "note: each user must run ./githook.sh install after cloning"
+    fi
 }
 
 githook_cmd_install() {
@@ -70,10 +87,6 @@ githook_cmd_install() {
 
     git config core.hooksPath "$GITHOOK_HOOKS_DIR"
     githook_info "set core.hooksPath=$GITHOOK_HOOKS_DIR"
-
-    echo ""
-    githook_info "done. add a hook:"
-    githook_info "  ./githook.sh add pre-commit \"npm test\""
 }
 
 githook_cmd_add() {
@@ -208,7 +221,7 @@ githook.sh - git hooks manager
 usage: ./githook.sh <command> [arguments]
 
 commands:
-  setup                 copy script to repo root
+  init                  initialize githook.sh in repo
   install               set up git hooks (run once per user)
   add <hook> [command]  create or append to a hook
   status                show status

@@ -1,20 +1,20 @@
 # main entry point
 
 githook_main() {
-    # default: setup if not installed, otherwise help
+    # default: init if not installed, otherwise help
     if [ -z "${1:-}" ]; then
         _git_root="$(git rev-parse --show-toplevel 2>/dev/null || echo "")"
         if [ -n "$_git_root" ] && [ -f "$_git_root/githook.sh" ]; then
             _command="help"
         else
-            _command="setup"
+            _command="init"
         fi
     else
         _command="$1"
     fi
 
     case "$_command" in
-        setup)     githook_cmd_setup ;;
+        init)      githook_cmd_init ;;
         install)   githook_cmd_install ;;
         add)       shift; githook_cmd_add "$@" ;;
         uninstall) githook_cmd_uninstall ;;

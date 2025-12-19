@@ -22,6 +22,7 @@
 <pre>curl -fsS https://githook.sh | sh</pre>
 <p>or with wget:</p>
 <pre>wget -qO- https://githook.sh | sh</pre>
+<p>if package.json exists, a "prepare" script is added automatically.</p>
 <h2>manual setup</h2>
 <pre># download the script
 curl -fsS https://githook.sh -o githook.sh
@@ -38,15 +39,9 @@ chmod +x githook.sh
 ./githook.sh status               show installed hooks
 ./githook.sh check-update         check for updates
 ./githook.sh uninstall            remove git hooks configuration</pre>
-<h2>npm/package.json integration</h2>
-<pre>{
-  "scripts": {
-    "prepare": "./githook.sh install"
-  }
-}</pre>
 <h2>makefile integration</h2>
-<pre>.PHONY: setup
-setup:
+<pre>.PHONY: init
+init:
 	./githook.sh install</pre>
 <h2>environment variables</h2>
 <pre>GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)

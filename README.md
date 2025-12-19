@@ -14,6 +14,8 @@ or with wget:
 wget -qO- https://githook.sh | sh
 ```
 
+if package.json exists, a "prepare" script is added automatically.
+
 ## manual setup
 
 ```sh
@@ -38,21 +40,11 @@ chmod +x githook.sh
 ./githook.sh uninstall            remove git hooks configuration
 ```
 
-## npm/package.json integration
-
-```json
-{
-  "scripts": {
-    "prepare": "./githook.sh install"
-  }
-}
-```
-
 ## makefile integration
 
 ```makefile
-.PHONY: setup
-setup:
+.PHONY: init
+init:
 	./githook.sh install
 ```
 
