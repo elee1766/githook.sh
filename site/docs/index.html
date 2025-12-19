@@ -159,7 +159,7 @@ fi</pre>
   pre-commit  # your hook scripts
   commit-msg
   ...</pre>
-<p>when git runs a hook, it calls the wrapper in <code>_/</code>, which checks <code>GITHOOK=0</code>, sources <code>~/.config/githook/init.sh</code> if it exists, and then runs your script from the parent directory.</p>
+<p>when git runs a hook, it calls the wrapper in <code>_/</code>, which sources <code>~/.config/githook/init.sh</code> if it exists, checks <code>GITHOOK=0</code>, and then runs your script from the parent directory.</p>
 <p>benefits:</p>
 <p>• hooks are version-controlled (committed to repo)</p>
 <p>• <code>GITHOOK=0</code> skips all hooks without <code>--no-verify</code></p>

@@ -127,16 +127,16 @@ githook_cmd_install() {
     # create shared hook runner
     cat > "$_git_root/$GITHOOK_INTERNAL_DIR/h" << 'HOOK'
 #!/bin/sh
+[ -f "$HOME/.config/githook/init.sh" ] && . "$HOME/.config/githook/init.sh"
 [ "$GITHOOK" = "2" ] && set -x
 [ "$GITHOOK" = "0" ] && exit 0
-[ -f ~/.config/githook/init.sh ] && . ~/.config/githook/init.sh
 n=$(basename "$0")
 h=$(dirname "$(dirname "$0")")/$n
 [ ! -f "$h" ] && exit 0
 sh -e "$h" "$@"
 c=$?
 [ $c != 0 ] && echo "githook - $n failed (code $c)"
-[ $c = 127 ] && echo "githook - command not found in PATH=$PATH"
+[ $c = 127 ] && echo "githook - command not found"
 exit $c
 HOOK
 

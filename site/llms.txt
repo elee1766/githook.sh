@@ -281,7 +281,7 @@ the structure is:
   ...
 ```
 
-when git runs a hook, it calls the wrapper in `_/`, which checks `GITHOOK=0`, sources `~/.config/githook/init.sh` if it exists, and then runs your script from the parent directory.
+when git runs a hook, it calls the wrapper in `_/`, which sources `~/.config/githook/init.sh` if it exists, checks `GITHOOK=0`, and then runs your script from the parent directory.
 
 benefits:
 - hooks are version-controlled (committed to repo)

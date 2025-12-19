@@ -1,4 +1,4 @@
-.PHONY: build clean test
+.PHONY: build clean test test-hooks test-all
 
 SRC := src/header.sh \
        src/constants.sh \
@@ -20,3 +20,8 @@ clean:
 
 test: build
 	@sh test/run.sh
+
+test-hooks: build
+	@sh test/hooks/run.sh
+
+test-all: test test-hooks
