@@ -1,7 +1,7 @@
 #!/bin/sh
 # githook.sh
 #
-# a single-file, zero-dependency git hooks manager.
+# git hooks made easier.
 #
 # LICENSE: Unlicense
 # SITE: https://githook.sh

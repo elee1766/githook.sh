@@ -20,6 +20,7 @@
 <b>integration:</b>
 <a href="#ci">ci/cd</a> ·
 <a href="#languages">languages</a> ·
+<a href="#npm">npm</a> ·
 <a href="#init">init.sh</a> ·
 <a href="#nvm">nvm</a>
 </div>
@@ -88,6 +89,14 @@ sys.exit(result.returncode)</pre>
 <pre>#!/usr/bin/env ruby
 system("bundle exec rubocop") || exit(1)</pre>
 <p>remember: exit with non-zero to block the git operation.</p>
+
+<h2 id="npm">package.json integration</h2>
+<p>auto-install hooks when developers run <code>npm install</code>:</p>
+<p><strong>npm / pnpm / bun:</strong></p>
+<pre>npm pkg set scripts.prepare="./.githook.sh install"</pre>
+<p><strong>yarn:</strong></p>
+<pre>npm pkg set scripts.postinstall="./.githook.sh install"</pre>
+<p>yarn uses <code>postinstall</code> instead of <code>prepare</code>.</p>
 
 <h2 id="init">global init script</h2>
 <p>create <code>~/.config/githook/init.sh</code> to run setup before any hook in any repo. useful for setting up PATH, node version managers, etc.</p>

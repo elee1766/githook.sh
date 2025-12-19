@@ -39,14 +39,20 @@ githook_cmd_init() {
 githook_cmd_install() {
     githook_is_disabled && githook_debug "skipping install (GITHOOK=0)" && exit 0
     _git_root="$(githook_check_git_repository)"
-    githook_info "installing git hooks..."
 
     _existing="$(git config core.hooksPath 2>/dev/null || true)"
-    if [ -n "$_existing" ] && [ "$_existing" != "$GITHOOK_INTERNAL_DIR" ] && [ "$_existing" != "$GITHOOK_DIR" ]; then
+
+    # already configured correctly - exit silently
+    [ "$_existing" = "$GITHOOK_INTERNAL_DIR" ] && return
+
+    # different hooks path set - prompt to override
+    if [ -n "$_existing" ] && [ "$_existing" != "$GITHOOK_DIR" ]; then
         githook_warn "core.hooksPath already set to: $_existing"
         printf "override with $GITHOOK_INTERNAL_DIR? [y/N] " && read -r _response
         case "$_response" in [yY]|[yY][eE][sS]) ;; *) githook_error "cancelled" ;; esac
     fi
+
+    githook_info "installing git hooks..."
 
     # create directories
     [ ! -d "$_git_root/$GITHOOK_DIR" ] && mkdir -p "$_git_root/$GITHOOK_DIR"
