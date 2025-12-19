@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>githook.sh</title>
+</head>
+<body>
+<pre>
+# githook.sh
+
+A single-file, zero-dependency Git hooks manager. Like Husky, but simpler.
+
+## Quick Install
+
+    curl -fsS https://githook.sh | sh
+
+Or with wget:
+
+    wget -qO- https://githook.sh | sh
+
+## Manual Setup
+
+    # Download the script
+    curl -fsS https://githook.sh -o githook.sh
+    chmod +x githook.sh
+
+    # Install hooks
+    ./githook.sh install
+
+    # Add your first hook
+    ./githook.sh add pre-commit "npm test"
+
+## Commands
+
+    ./githook.sh install              Set up Git hooks for this repository
+    ./githook.sh add &lt;hook&gt; "cmd"     Create or append to a hook
+    ./githook.sh status               Show installed hooks
+    ./githook.sh update               Check for updates
+    ./githook.sh uninstall            Remove Git hooks configuration
+
+## npm/package.json Integration
+
+    {
+      "scripts": {
+        "prepare": "GITHOOK_DISABLE=${CI:-} ./githook.sh install"
+      }
+    }
+
+## Environment Variables
+
+    GITHOOK_DISABLE=1    Skip hooks/installation (useful for CI)
+    GITHOOK_DEBUG=1      Show debug output
+
+## Supported Hooks
+
+    pre-commit, pre-push, commit-msg, prepare-commit-msg,
+    post-commit, post-merge, pre-rebase, post-checkout,
+    post-rewrite, pre-auto-gc, applypatch-msg,
+    pre-applypatch, post-applypatch
+
+## Source
+
+    https://github.com/elee1766/githook.sh
+
+## License
+
+    Unlicense (Public Domain)
+</pre>
+</body>
+</html>

@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: githook-sh
+    runtime: docker
+    plan: free
+    autoDeploy: true
+    branch: main
+    healthCheckPath: /health

@@ -1,0 +1,39 @@
+# Caddyfile for githook.sh
+# CLI tools get the script, everyone else (browsers, crawlers) gets HTML
+
+{
+	admin off
+	auto_https off
+}
+
+:80 {
+	root * /srv/site
+
+	# Detect CLI tools - serve raw script
+	@cli {
+		header_regexp User-Agent (?i)(curl|wget|httpie|fetch|libfetch|Go-http-client|python-requests|ruby|perl|aria2|axel|lynx|links|w3m|elinks)
+	}
+
+	# Health check
+	handle /health {
+		respond "OK" 200
+	}
+
+	# CLI tools get the raw script
+	handle @cli {
+		rewrite * /githook.sh
+		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+
+	# Everyone else (browsers, crawlers, bots) gets HTML
+	handle {
+		rewrite * /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}
