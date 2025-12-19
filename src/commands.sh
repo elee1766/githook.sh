@@ -60,6 +60,7 @@ githook_cmd_install() {
 #!/bin/sh
 [ "$GITHOOK" = "2" ] && set -x
 [ "$GITHOOK" = "0" ] && exit 0
+[ -f ~/.config/githook/init.sh ] && . ~/.config/githook/init.sh
 n=$(basename "$0")
 h=$(dirname "$(dirname "$0")")/$n
 [ ! -f "$h" ] && exit 0

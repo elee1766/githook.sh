@@ -11,7 +11,7 @@
 <h1><a href="/">githook.sh</a> docs</h1>
 <nav>
 <div><span>basics</span><a href="#creating">creating</a><a href="#skipping">skipping</a><a href="#testing">testing</a></div>
-<div><span>integration</span><a href="#ci">ci/cd</a><a href="#languages">languages</a><a href="#nvm">nvm</a></div>
+<div><span>integration</span><a href="#ci">ci/cd</a><a href="#languages">languages</a><a href="#init">init.sh</a><a href="#nvm">nvm</a></div>
 <div><span>reference</span><a href="#examples">examples</a><a href="#debug">debug</a><a href="#uninstall">uninstall</a><a href="#how">how it works</a></div>
 </nav>
 
@@ -76,8 +76,25 @@ sys.exit(result.returncode)</pre>
 system("bundle exec rubocop") || exit(1)</pre>
 <p>remember: exit with non-zero to block the git operation.</p>
 
+<h2 id="init">global init script</h2>
+<p>create <code>~/.config/githook/init.sh</code> to run setup before any hook in any repo. useful for setting up PATH, node version managers, etc.</p>
+<pre>mkdir -p ~/.config/githook
+cat > ~/.config/githook/init.sh << 'EOF'
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# fnm
+# eval "$(fnm env)"
+
+# volta
+# export VOLTA_HOME="$HOME/.volta"
+# export PATH="$VOLTA_HOME/bin:$PATH"
+EOF</pre>
+<p>this is sourced before every hook runs, so you don't need to repeat setup in each hook script.</p>
+
 <h2 id="nvm">node version managers</h2>
-<p>gui clients and ides may not load your shell profile, causing "command not found" errors. source your version manager in the hook:</p>
+<p>gui clients and ides may not load your shell profile, causing "command not found" errors. either use the <a href="#init">global init script</a>, or source your version manager in each hook:</p>
 <p>nvm:</p>
 <pre>#!/bin/sh
 export NVM_DIR="$HOME/.nvm"
@@ -142,7 +159,7 @@ fi</pre>
   pre-commit  # your hook scripts
   commit-msg
   ...</pre>
-<p>when git runs a hook, it calls the wrapper in <code>_/</code>, which checks <code>GITHOOK=0</code> and then runs your script from the parent directory.</p>
+<p>when git runs a hook, it calls the wrapper in <code>_/</code>, which checks <code>GITHOOK=0</code>, sources <code>~/.config/githook/init.sh</code> if it exists, and then runs your script from the parent directory.</p>
 <p>benefits:</p>
 <p>• hooks are version-controlled (committed to repo)</p>
 <p>• <code>GITHOOK=0</code> skips all hooks without <code>--no-verify</code></p>

@@ -10,7 +10,7 @@
 set -e
 # constants
 
-GITHOOK_VERSION="0.1.9"
+GITHOOK_VERSION="0.1.11"
 GITHOOK_API_URL="https://githook.sh"
 GITHOOK_DIR=".githook"
 GITHOOK_INTERNAL_DIR=".githook/_"
@@ -129,6 +129,7 @@ githook_cmd_install() {
 #!/bin/sh
 [ "$GITHOOK" = "2" ] && set -x
 [ "$GITHOOK" = "0" ] && exit 0
+[ -f ~/.config/githook/init.sh ] && . ~/.config/githook/init.sh
 n=$(basename "$0")
 h=$(dirname "$(dirname "$0")")/$n
 [ ! -f "$h" ] && exit 0

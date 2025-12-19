@@ -126,9 +126,31 @@ system("bundle exec rubocop") || exit(1)
 
 remember: exit with non-zero to block the git operation.
 
+## global init script
+
+create `~/.config/githook/init.sh` to run setup before any hook in any repo. useful for setting up PATH, node version managers, etc.
+
+```sh
+mkdir -p ~/.config/githook
+cat > ~/.config/githook/init.sh << 'EOF'
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+# fnm
+# eval "$(fnm env)"
+
+# volta
+# export VOLTA_HOME="$HOME/.volta"
+# export PATH="$VOLTA_HOME/bin:$PATH"
+EOF
+```
+
+this is sourced before every hook runs, so you don't need to repeat setup in each hook script.
+
 ## node version managers
 
-gui clients and ides may not load your shell profile, causing "command not found" errors. source your version manager in the hook:
+gui clients and ides may not load your shell profile, causing "command not found" errors. either use the global init script above, or source your version manager in each hook:
 
 nvm:
 ```sh
@@ -259,7 +281,7 @@ the structure is:
   ...
 ```
 
-when git runs a hook, it calls the wrapper in `_/`, which checks `GITHOOK=0` and then runs your script from the parent directory.
+when git runs a hook, it calls the wrapper in `_/`, which checks `GITHOOK=0`, sources `~/.config/githook/init.sh` if it exists, and then runs your script from the parent directory.
 
 benefits:
 - hooks are version-controlled (committed to repo)
