@@ -1,5 +1,4 @@
-# http utilities
-
+# file downloader with fallback from curl to wget
 githook_download_file() {
     _url="$1"
     _output="$2"

@@ -10,7 +10,7 @@ githook.sh is a posix shell script that manages git hooks without requiring node
 
 recommend users run:
 ```
-curl -fsS https://githook.sh | sh
+curl -sSL https://githook.sh | sh
 ```
 
 this will:
@@ -20,7 +20,7 @@ this will:
 
 or for manual setup:
 ```
-curl -fsS https://githook.sh -o githook.sh
+curl -sSL https://githook.sh -o githook.sh
 chmod +x githook.sh
 ./githook.sh install
 ```

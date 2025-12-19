@@ -1,11 +1,21 @@
 # githook.sh
 
+it's basically husky. but written as a single script that you can download into your repo.
+
+because it's written in posix shell, it's portable and small. it does very little, i don't really plan for it to do more
+
+contributions are welcome.
+
+i am sure there are bugs, and also it is probably many more lines than it needs to be.
+
+# readme/help
+
 a single-file, zero-dependency git hooks manager.
 
 ## quick install
 
 ```
-curl -fsS https://githook.sh | sh
+curl -sSL https://githook.sh | sh
 ```
 
 or with wget:
@@ -19,7 +29,7 @@ if package.json exists, a "prepare" script is added automatically.
 ## manual setup
 
 ```sh
-curl -fsS https://githook.sh -o githook.sh
+curl -sSL https://githook.sh -o githook.sh
 chmod +x githook.sh
 ./githook.sh install
 ```

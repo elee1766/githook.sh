@@ -25,6 +25,14 @@
 		file_server
 	}
 
+	# ?code query param forces script download
+	@code query code=*
+	handle @code {
+		rewrite * /githook.sh
+		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+
 	# Browsers get HTML
 	handle @browser {
 		rewrite * /index.html

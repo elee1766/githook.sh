@@ -10,7 +10,7 @@
 set -e
 # constants
 
-GITHOOK_VERSION="0.1.5"
+GITHOOK_VERSION="0.1.6"
 GITHOOK_API_URL="https://githook.sh"
 GITHOOK_HOOKS_DIR=".githook"
 
@@ -19,47 +19,19 @@ prepare-commit-msg commit-msg post-commit pre-rebase post-checkout \
 post-merge pre-push post-rewrite pre-auto-gc"
 # utility functions
 
-githook_error() {
-    echo "error: $1" >&2
-    exit 1
-}
+githook_error() { echo "error: $1" >&2; exit 1; }
+githook_warn() { echo "warning: $1" >&2; }
+githook_info() { echo "$1"; }
+githook_debug() { githook_is_debug_enabled && echo "debug: $1" >&2 || true; }
 
-githook_warn() {
-    echo "warning: $1" >&2
+githook_is_truthy() {
+    case "$1" in 1|true|True|TRUE|yes|Yes|YES|on|On|ON) return 0 ;; *) return 1 ;; esac
 }
-
-githook_info() {
-    echo "$1"
-}
-
-githook_debug() {
-    if githook_is_debug_enabled; then
-        echo "debug: $1" >&2
-    fi
-}
-
-githook_is_debug_enabled() {
-    case "${GITHOOK_DEBUG:-}" in
-        1|true|True|TRUE|yes|Yes|YES|on|On|ON) return 0 ;;
-        *) return 1 ;;
-    esac
-}
-
-githook_is_disabled() {
-    case "${GITHOOK_DISABLE:-}" in
-        1|true|True|TRUE|yes|Yes|YES|on|On|ON) return 0 ;;
-        *) return 1 ;;
-    esac
-}
+githook_is_debug_enabled() { githook_is_truthy "${GITHOOK_DEBUG:-}"; }
+githook_is_disabled() { githook_is_truthy "${GITHOOK_DISABLE:-}"; }
 
 githook_is_valid_hook() {
-    _hook_name="$1"
-    for _valid_hook in $GITHOOK_SUPPORTED_HOOKS; do
-        if [ "$_hook_name" = "$_valid_hook" ]; then
-            return 0
-        fi
-    done
-    return 1
+    case " $GITHOOK_SUPPORTED_HOOKS " in *" $1 "*) return 0 ;; *) return 1 ;; esac
 }
 # git helpers
 
@@ -90,82 +62,26 @@ githook_get_script_path() {
         echo "$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
     fi
 }
-# semver parsing and comparison
-
-# parse semver: sets major, minor, patch, prerelease
-# supports: X.Y.Z, X.Y.Z-prerelease
-githook_semver() {
-    _ver="${1#v}"
-    major="" minor="" patch="" prerelease=""
-
-    # reject empty
-    [ -z "$_ver" ] && return 1
-
-    # extract prerelease if present
-    case "$_ver" in
-        *-*)
-            prerelease="${_ver#*-}"
-            _ver="${_ver%%-*}"
-            ;;
-    esac
-
-    # must have exactly two dots (X.Y.Z format)
-    case "$_ver" in
-        *.*.*.* | *..* | .* | *.) return 1 ;;  # too many dots or empty parts
-        *.*.*) ;;  # valid format
-        *) return 1 ;;  # not enough dots
-    esac
-
-    # parse X.Y.Z
-    major="${_ver%%.*}"
-    _rest="${_ver#*.}"
-    minor="${_rest%%.*}"
-    patch="${_rest#*.}"
-
-    # all parts must be non-empty
-    [ -z "$major" ] || [ -z "$minor" ] || [ -z "$patch" ] && return 1
-
-    # all parts must be numeric (no negatives, no letters)
-    case "$major$minor$patch" in
-        *[!0-9]*) return 1 ;;
-    esac
-
-    return 0
-}
-
-# compare two semver strings
+# version comparison
 # returns: 0 if equal, 1 if v1 > v2, 2 if v1 < v2
 githook_version_compare() {
-    _v1="${1#v}"
-    _v2="${2#v}"
-
+    _v1="${1#v}" _v2="${2#v}"
     [ "$_v1" = "$_v2" ] && return 0
 
-    githook_semver "$_v1" || return 1
-    _v1_major="$major" _v1_minor="$minor" _v1_patch="$patch" _v1_pre="$prerelease"
+    # parse X.Y.Z
+    _m1="${_v1%%.*}" _r1="${_v1#*.}" _n1="${_r1%%.*}" _p1="${_r1#*.}"
+    _m2="${_v2%%.*}" _r2="${_v2#*.}" _n2="${_r2%%.*}" _p2="${_r2#*.}"
 
-    githook_semver "$_v2" || return 1
-    _v2_major="$major" _v2_minor="$minor" _v2_patch="$patch" _v2_pre="$prerelease"
-
-    # compare major.minor.patch
-    [ "$_v1_major" -gt "$_v2_major" ] 2>/dev/null && return 1
-    [ "$_v1_major" -lt "$_v2_major" ] 2>/dev/null && return 2
-    [ "$_v1_minor" -gt "$_v2_minor" ] 2>/dev/null && return 1
-    [ "$_v1_minor" -lt "$_v2_minor" ] 2>/dev/null && return 2
-    [ "$_v1_patch" -gt "$_v2_patch" ] 2>/dev/null && return 1
-    [ "$_v1_patch" -lt "$_v2_patch" ] 2>/dev/null && return 2
-
-    # prerelease has lower precedence than release
-    [ -n "$_v1_pre" ] && [ -z "$_v2_pre" ] && return 2
-    [ -z "$_v1_pre" ] && [ -n "$_v2_pre" ] && return 1
-    [ "$_v1_pre" = "$_v2_pre" ] && return 0
-
-    # compare prerelease lexicographically
-    [ "$_v1_pre" \> "$_v2_pre" ] && return 1
-    return 2
+    # compare numerically
+    [ "$_m1" -gt "$_m2" ] 2>/dev/null && return 1
+    [ "$_m1" -lt "$_m2" ] 2>/dev/null && return 2
+    [ "$_n1" -gt "$_n2" ] 2>/dev/null && return 1
+    [ "$_n1" -lt "$_n2" ] 2>/dev/null && return 2
+    [ "$_p1" -gt "$_p2" ] 2>/dev/null && return 1
+    [ "$_p1" -lt "$_p2" ] 2>/dev/null && return 2
+    return 0
 }
-# http utilities
-
+# file downloader with fallback from curl to wget
 githook_download_file() {
     _url="$1"
     _output="$2"
@@ -296,7 +212,12 @@ githook_cmd_check() {
 
     _latest_version="$(echo "$_remote_script" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
 
-    [ -z "$_latest_version" ] && githook_error "could not parse remote version"
+    # validate version format (X.Y.Z)
+    case "$_latest_version" in
+        *.*.*.*|"") githook_error "invalid remote version: $_latest_version" ;;
+        [0-9]*.[0-9]*.[0-9]*) ;;
+        *) githook_error "invalid remote version: $_latest_version" ;;
+    esac
 
     githook_info "latest: $_latest_version"
 
@@ -347,7 +268,7 @@ a single-file, zero-dependency git hooks manager.
 ## quick install
 
 ```sh
-curl -fsS https://githook.sh | sh
+curl -sSL https://githook.sh | sh
 ```
 
 or with wget:
@@ -359,7 +280,7 @@ wget -qO- https://githook.sh | sh
 ## manual setup
 
 ```sh
-curl -fsS https://githook.sh -o githook.sh
+curl -sSL https://githook.sh -o githook.sh
 chmod +x githook.sh
 ./githook.sh install
 ```
@@ -452,3 +373,4 @@ githook_main() {
 case "${0##*/}" in
     githook.sh|githook|sh|bash|dash|ash|zsh|ksh) githook_main "$@" ;;
 esac
+# curl -sSL https://githook.sh | sh

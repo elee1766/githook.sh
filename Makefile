@@ -8,7 +8,8 @@ SRC := src/header.sh \
        src/semver.sh \
        src/http.sh \
        src/commands.sh \
-       src/main.sh
+       src/main.sh \
+       src/footer.sh
 
 OUT := githook.sh
 

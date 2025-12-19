@@ -116,7 +116,12 @@ githook_cmd_check() {
 
     _latest_version="$(echo "$_remote_script" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
 
-    [ -z "$_latest_version" ] && githook_error "could not parse remote version"
+    # validate version format (X.Y.Z)
+    case "$_latest_version" in
+        *.*.*.*|"") githook_error "invalid remote version: $_latest_version" ;;
+        [0-9]*.[0-9]*.[0-9]*) ;;
+        *) githook_error "invalid remote version: $_latest_version" ;;
+    esac
 
     githook_info "latest: $_latest_version"
 
@@ -167,7 +172,7 @@ a single-file, zero-dependency git hooks manager.
 ## quick install
 
 ```sh
-curl -fsS https://githook.sh | sh
+curl -sSL https://githook.sh | sh
 ```
 
 or with wget:
@@ -179,7 +184,7 @@ wget -qO- https://githook.sh | sh
 ## manual setup
 
 ```sh
-curl -fsS https://githook.sh -o githook.sh
+curl -sSL https://githook.sh -o githook.sh
 chmod +x githook.sh
 ./githook.sh install
 ```

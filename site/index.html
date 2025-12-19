@@ -12,8 +12,6 @@
         h2::before { content: "## "; }
         h2 { margin-top: 1em; }
         pre { margin-left: 4ch; }
-        pre::before { content: "```\A"; white-space: pre; }
-        pre::after { content: "\A```"; white-space: pre; }
         a { color: inherit; }
     </style>
 </head>
@@ -21,11 +19,11 @@
 <h1>githook.sh</h1>
 <p>a single-file, zero-dependency git hooks manager.</p>
 <h2>quick install</h2>
-<pre>curl -fsS https://githook.sh | sh</pre>
+<pre>curl -sSL https://githook.sh | sh</pre>
 <p>or with wget:</p>
 <pre>wget -qO- https://githook.sh | sh</pre>
 <h2>manual setup</h2>
-<pre>curl -fsS https://githook.sh -o githook.sh
+<pre>curl -sSL https://githook.sh -o githook.sh
 chmod +x githook.sh
 ./githook.sh install</pre>
 <h2>commands</h2>
