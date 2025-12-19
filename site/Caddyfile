@@ -19,6 +19,12 @@
 		respond "OK" 200
 	}
 
+	# llms.txt served as plain text
+	handle /llms.txt {
+		header Content-Type "text/plain; charset=utf-8"
+		file_server
+	}
+
 	# CLI tools get the raw script
 	handle @cli {
 		rewrite * /githook.sh

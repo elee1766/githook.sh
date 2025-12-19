@@ -3,69 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="a single-file, zero-dependency git hooks manager.">
     <title>githook.sh</title>
+    <style>
+        * { margin: 0; padding: 0; font: inherit; }
+        body { font-family: monospace; padding: 1em; line-height: 1.4; }
+        h1::before { content: "# "; }
+        h2::before { content: "## "; }
+        h2 { margin-top: 1em; }
+        pre { margin-left: 4ch; }
+        a { color: inherit; }
+    </style>
 </head>
 <body>
-<pre>
-# githook.sh
+<h1>githook.sh</h1>
+<p>a single-file, zero-dependency git hooks manager.</p>
+<h2>quick install</h2>
+<pre>curl -fsS https://githook.sh | sh</pre>
+<p>or with wget:</p>
+<pre>wget -qO- https://githook.sh | sh</pre>
+<h2>manual setup</h2>
+<pre># download the script
+curl -fsS https://githook.sh -o githook.sh
+chmod +x githook.sh
 
-A single-file, zero-dependency Git hooks manager. Like Husky, but simpler.
+# install hooks
+./githook.sh install
 
-## Quick Install
-
-    curl -fsS https://githook.sh | sh
-
-Or with wget:
-
-    wget -qO- https://githook.sh | sh
-
-## Manual Setup
-
-    # Download the script
-    curl -fsS https://githook.sh -o githook.sh
-    chmod +x githook.sh
-
-    # Install hooks
-    ./githook.sh install
-
-    # Add your first hook
-    ./githook.sh add pre-commit "npm test"
-
-## Commands
-
-    ./githook.sh install              Set up Git hooks for this repository
-    ./githook.sh add &lt;hook&gt; "cmd"     Create or append to a hook
-    ./githook.sh status               Show installed hooks
-    ./githook.sh update               Check for updates
-    ./githook.sh uninstall            Remove Git hooks configuration
-
-## npm/package.json Integration
-
-    {
-      "scripts": {
-        "prepare": "GITHOOK_DISABLE=${CI:-} ./githook.sh install"
-      }
-    }
-
-## Environment Variables
-
-    GITHOOK_DISABLE=1    Skip hooks/installation (useful for CI)
-    GITHOOK_DEBUG=1      Show debug output
-
-## Supported Hooks
-
-    pre-commit, pre-push, commit-msg, prepare-commit-msg,
-    post-commit, post-merge, pre-rebase, post-checkout,
-    post-rewrite, pre-auto-gc, applypatch-msg,
-    pre-applypatch, post-applypatch
-
-## Source
-
-    https://github.com/elee1766/githook.sh
-
-## License
-
-    Unlicense (Public Domain)
-</pre>
+# add your first hook
+./githook.sh add pre-commit "npm test"</pre>
+<h2>commands</h2>
+<pre>./githook.sh install              set up git hooks (run once per user)
+./githook.sh add &lt;hook&gt; "cmd"     create or append to a hook
+./githook.sh status               show installed hooks
+./githook.sh check-update         check for updates
+./githook.sh uninstall            remove git hooks configuration</pre>
+<h2>npm/package.json integration</h2>
+<pre>{
+  "scripts": {
+    "prepare": "./githook.sh install"
+  }
+}</pre>
+<h2>makefile integration</h2>
+<pre>.PHONY: setup
+setup:
+	./githook.sh install</pre>
+<h2>environment variables</h2>
+<pre>GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)
+GITHOOK_DEBUG=1      show debug output</pre>
+<h2>supported hooks</h2>
+<pre>pre-commit, pre-push, commit-msg, prepare-commit-msg,
+post-commit, post-merge, pre-rebase, post-checkout,
+post-rewrite, pre-auto-gc, applypatch-msg,
+pre-applypatch, post-applypatch</pre>
+<h2>source</h2>
+<pre><a href="https://github.com/elee1766/githook.sh">https://github.com/elee1766/githook.sh</a></pre>
+<h2>license</h2>
+<pre>unlicense (public domain)</pre>
 </body>
 </html>
