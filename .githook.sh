@@ -10,7 +10,7 @@
 set -e
 # constants
 
-GITHOOK_VERSION="0.1.9"
+GITHOOK_VERSION="0.1.12"
 GITHOOK_API_URL="https://githook.sh"
 GITHOOK_DIR=".githook"
 GITHOOK_INTERNAL_DIR=".githook/_"
@@ -127,6 +127,7 @@ githook_cmd_install() {
     # create shared hook runner
     cat > "$_git_root/$GITHOOK_INTERNAL_DIR/h" << 'HOOK'
 #!/bin/sh
+[ -f "$HOME/.config/githook/init.sh" ] && . "$HOME/.config/githook/init.sh"
 [ "$GITHOOK" = "2" ] && set -x
 [ "$GITHOOK" = "0" ] && exit 0
 n=$(basename "$0")
@@ -135,7 +136,7 @@ h=$(dirname "$(dirname "$0")")/$n
 sh -e "$h" "$@"
 c=$?
 [ $c != 0 ] && echo "githook - $n failed (code $c)"
-[ $c = 127 ] && echo "githook - command not found in PATH=$PATH"
+[ $c = 127 ] && echo "githook - command not found"
 exit $c
 HOOK
 
@@ -176,10 +177,17 @@ githook_cmd_update() {
     _git_root="$(githook_check_git_repository)"
     _path="$_git_root/.githook.sh"
     [ ! -f "$_path" ] && githook_error ".githook.sh not found in repo root"
-    githook_info "updating .githook.sh..."
-    githook_download_file "$GITHOOK_API_URL" "$_path" || githook_error "failed to download update"
+    githook_info "checking for updates..."
+    _remote="$(githook_download_file "$GITHOOK_API_URL" - 2>/dev/null)" || githook_error "failed to fetch latest version"
+    _latest="$(echo "$_remote" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
+    case "$_latest" in [0-9]*.[0-9]*.[0-9]*) ;; *) githook_error "invalid remote version: $_latest" ;; esac
+    githook_version_compare "$GITHOOK_VERSION" "$_latest"
+    case $? in 0|1) githook_info "already up to date ($GITHOOK_VERSION)"; return ;; esac
+    githook_info "updating $GITHOOK_VERSION -> $_latest..."
+    echo "$_remote" > "$_path"
     chmod +x "$_path"
-    githook_info "updated successfully"
+    githook_info "updated to $_latest"
+    githook_info "run ./.githook.sh install to update hooks"
 }
 
 githook_cmd_version() {

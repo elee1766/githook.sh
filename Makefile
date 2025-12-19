@@ -7,7 +7,7 @@ SRC := src/header.sh \
        src/main.sh \
        src/footer.sh
 
-OUT := githook.sh
+OUT ?= .githook.sh
 
 build: $(OUT)
 

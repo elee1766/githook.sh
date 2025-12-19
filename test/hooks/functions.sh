@@ -25,7 +25,7 @@ setup() {
 }
 
 install() {
-    cp "$PROJECT_DIR/githook.sh" .githook.sh
+    cp "$PROJECT_DIR/.githook.sh" .githook.sh
     chmod +x .githook.sh
     ./.githook.sh install
 }

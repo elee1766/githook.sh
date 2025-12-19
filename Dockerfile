@@ -13,7 +13,7 @@ RUN make build
 FROM caddy:2-alpine
 
 COPY site/ /srv/site/
-COPY --from=builder /build/githook.sh /srv/site/githook.sh
+COPY --from=builder /build/.githook.sh /srv/site/githook.sh
 COPY Caddyfile /etc/caddy/Caddyfile
 
 EXPOSE 80
