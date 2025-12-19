@@ -2,13 +2,21 @@
 
 githook_cmd_setup() {
     _git_root="$(githook_check_git_repository)"
-    _script_path="$(githook_get_script_path)"
     _target_path="$_git_root/githook.sh"
 
-    if [ "$_script_path" = "$_target_path" ]; then
-        githook_info "already in repo root: $_target_path"
-        chmod +x "$_target_path"
-        return
+    # check if running from file or piped
+    case "${0##*/}" in
+        sh|bash|dash|ash|zsh|ksh) _piped=1 ;;
+        *) _piped=0 ;;
+    esac
+
+    if [ "$_piped" -eq 0 ]; then
+        _script_path="$(githook_get_script_path)"
+        if [ "$_script_path" = "$_target_path" ]; then
+            githook_info "already in repo root: $_target_path"
+            chmod +x "$_target_path"
+            return
+        fi
     fi
 
     if [ -f "$_target_path" ]; then
@@ -21,10 +29,15 @@ githook_cmd_setup() {
         esac
     fi
 
-    cp "$_script_path" "$_target_path"
+    if [ "$_piped" -eq 1 ]; then
+        githook_info "downloading githook.sh..."
+        githook_download_file "$GITHOOK_API_URL" "$_target_path"
+    else
+        cp "$_script_path" "$_target_path"
+    fi
     chmod +x "$_target_path"
 
-    githook_info "copied to $_target_path"
+    githook_info "installed to $_target_path"
     echo ""
     githook_info "next:"
     githook_info "  ./githook.sh install"

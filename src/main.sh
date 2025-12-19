@@ -26,7 +26,7 @@ githook_main() {
     esac
 }
 
-# only run if executed directly (not sourced)
+# run if executed directly or piped
 case "${0##*/}" in
-    githook.sh|githook) githook_main "$@" ;;
+    githook.sh|githook|sh|bash|dash|ash|zsh|ksh) githook_main "$@" ;;
 esac
