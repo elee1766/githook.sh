@@ -3,9 +3,6 @@
 SRC := src/header.sh \
        src/constants.sh \
        src/utils.sh \
-       src/git.sh \
-       src/semver.sh \
-       src/http.sh \
        src/commands.sh \
        src/main.sh \
        src/footer.sh
