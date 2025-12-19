@@ -1,4 +1,4 @@
-.PHONY: build clean test
+.PHONY: build clean test site-preview
 
 SRC := src/header.sh \
        src/constants.sh \
@@ -23,3 +23,6 @@ clean:
 
 test: build
 	@sh test/run.sh
+
+site-preview:
+	caddy file-server --root site

@@ -25,6 +25,12 @@
 		file_server
 	}
 
+	# docs page
+	handle /docs {
+		rewrite * /docs.html
+		file_server
+	}
+
 	# ?code query param forces script download
 	@code query code=*
 	handle @code {

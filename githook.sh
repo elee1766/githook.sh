@@ -10,7 +10,7 @@
 set -e
 # constants
 
-GITHOOK_VERSION="0.1.6"
+GITHOOK_VERSION="0.1.7"
 GITHOOK_API_URL="https://githook.sh"
 GITHOOK_HOOKS_DIR=".githook"
 
@@ -77,7 +77,7 @@ githook_download_file() {
 
 githook_cmd_init() {
     _git_root="$(githook_check_git_repository)"
-    _target_path="$_git_root/githook.sh"
+    _target_path="$_git_root/.githook.sh"
     case "${0##*/}" in sh|bash|dash|ash|zsh|ksh) _piped=1 ;; *) _piped=0 ;; esac
 
     if [ "$_piped" -eq 0 ]; then
@@ -86,13 +86,13 @@ githook_cmd_init() {
     fi
 
     if [ -f "$_target_path" ]; then
-        githook_warn "githook.sh already exists in repo root"
+        githook_warn ".githook.sh already exists in repo root"
         printf "overwrite? [y/N] " && read -r _response
         case "$_response" in [yY]|[yY][eE][sS]) ;; *) githook_info "cancelled"; return ;; esac
     fi
 
     if [ "$_piped" -eq 1 ]; then
-        githook_info "downloading githook.sh..."
+        githook_info "downloading .githook.sh..."
         githook_download_file "$GITHOOK_API_URL" "$_target_path"
     else
         cp "$_script_path" "$_target_path"
@@ -103,11 +103,11 @@ githook_cmd_init() {
     githook_cmd_install
     echo ""
     if [ -f "$_git_root/package.json" ]; then
-        npm pkg set scripts.prepare="./githook.sh install" 2>/dev/null \
+        npm pkg set scripts.prepare="./.githook.sh install" 2>/dev/null \
             && githook_info "added prepare script to package.json" \
-            || githook_info "tip: add to package.json scripts: \"prepare\": \"./githook.sh install\""
+            || githook_info "tip: add to package.json scripts: \"prepare\": \"./.githook.sh install\""
     else
-        githook_info "note: each user must run ./githook.sh install after cloning"
+        githook_info "note: each user must run ./.githook.sh install after cloning"
     fi
 }
 
@@ -134,7 +134,7 @@ githook_cmd_uninstall() {
     git config --unset core.hooksPath 2>/dev/null || true
     githook_info "removed core.hooksPath"
     [ -d "$_git_root/$GITHOOK_HOOKS_DIR" ] && githook_info "kept $GITHOOK_HOOKS_DIR/ (your scripts are still there)"
-    githook_info "reinstall with: ./githook.sh install"
+    githook_info "reinstall with: ./.githook.sh install"
 }
 
 githook_cmd_check() {
@@ -145,14 +145,14 @@ githook_cmd_check() {
     case "$_latest" in [0-9]*.[0-9]*.[0-9]*) ;; *) githook_error "invalid remote version: $_latest" ;; esac
     githook_info "latest: $_latest"
     githook_version_compare "$GITHOOK_VERSION" "$_latest"
-    case $? in 0) githook_info "up to date" ;; 1) githook_info "ahead of latest" ;; 2) githook_info "update available! run: ./githook.sh update" ;; esac
+    case $? in 0) githook_info "up to date" ;; 1) githook_info "ahead of latest" ;; 2) githook_info "update available! run: ./.githook.sh update" ;; esac
 }
 
 githook_cmd_update() {
     _git_root="$(githook_check_git_repository)"
-    _path="$_git_root/githook.sh"
-    [ ! -f "$_path" ] && githook_error "githook.sh not found in repo root"
-    githook_info "updating githook.sh..."
+    _path="$_git_root/.githook.sh"
+    [ ! -f "$_path" ] && githook_error ".githook.sh not found in repo root"
+    githook_info "updating .githook.sh..."
     githook_download_file "$GITHOOK_API_URL" "$_path" || githook_error "failed to download update"
     chmod +x "$_path"
     githook_info "updated successfully"
@@ -162,15 +162,15 @@ githook_cmd_version() {
     echo "githook.sh $GITHOOK_VERSION"
 }
 
-githook_cmd_help() { _h='# githook.sh - a single-file, zero-dependency git hooks manager.
+githook_cmd_help() { _h='# .githook.sh - a single-file, zero-dependency git hooks manager.
 
 ## quick install
   curl -sSL https://githook.sh | sh
   wget -qO- https://githook.sh | sh
 
 ## manual setup
-  curl -sSL https://githook.sh -o githook.sh
-  chmod +x githook.sh && ./githook.sh install
+  curl -sSL https://githook.sh -o .githook.sh
+  chmod +x .githook.sh && ./.githook.sh install
 
 ## commands
   install       set up git hooks (run once per clone)
@@ -182,15 +182,18 @@ githook_cmd_help() { _h='# githook.sh - a single-file, zero-dependency git hooks
   create executable scripts in .githook/ (e.g. .githook/pre-commit)
 
 ## npm/pnpm/bun
-  npm pkg set scripts.prepare="./githook.sh install"
+  npm pkg set scripts.prepare="./.githook.sh install"
 
 ## makefile
   .PHONY: prepare
-  prepare: ; ./githook.sh install
+  prepare: ; ./.githook.sh install
 
 ## environment variables
   GITHOOK_DISABLE=1  skip hooks (useful for ci)
   GITHOOK_DEBUG=1    show debug output
+
+## more info
+  https://githook.sh/docs
 
 ## source & license
   https://github.com/elee1766/githook.sh (unlicense)'
@@ -201,7 +204,7 @@ githook_main() {
     # default: init if not installed, otherwise help
     if [ -z "${1:-}" ]; then
         _git_root="$(git rev-parse --show-toplevel 2>/dev/null || echo "")"
-        if [ -n "$_git_root" ] && [ -f "$_git_root/githook.sh" ]; then
+        if [ -n "$_git_root" ] && [ -f "$_git_root/.githook.sh" ]; then
             _command="help"
         else
             _command="init"
@@ -218,12 +221,13 @@ githook_main() {
         update)    githook_cmd_update ;;
         version)   githook_cmd_version ;;
         help|--help|-h) githook_cmd_help ;;
-        *) githook_error "unknown command: $_command (try ./githook.sh help)" ;;
+        *) githook_error "unknown command: $_command (try ./.githook.sh help)" ;;
     esac
 }
 
 # run if executed directly or piped
 case "${0##*/}" in
-    githook.sh|githook|sh|bash|dash|ash|zsh|ksh) githook_main "$@" ;;
+    .githook.sh|githook.sh|githook|sh|bash|dash|ash|zsh|ksh) githook_main "$@" ;;
 esac
-# curl -sSL https://githook.sh | sh
+# to install:
+# curl -sSL https://githook.sh | sh  ->  .githook.sh

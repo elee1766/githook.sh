@@ -14,34 +14,195 @@ curl -sSL https://githook.sh | sh
 ```
 
 this will:
-1. download githook.sh to the repo root
+1. download .githook.sh to the repo root
 2. configure git hooks
 3. if package.json exists, add a "prepare" script automatically
 
 or for manual setup:
 ```
-curl -sSL https://githook.sh -o githook.sh
-chmod +x githook.sh
-./githook.sh install
+curl -sSL https://githook.sh -o .githook.sh
+chmod +x .githook.sh
+./.githook.sh install
 ```
 
-## adding hooks
+## creating hooks
 
-create executable scripts in `.githook/` directory:
+add an executable script to `.githook/` named after the git hook you want:
 ```
 echo '#!/bin/sh
 npm test' > .githook/pre-commit
 chmod +x .githook/pre-commit
 ```
 
-## supported hooks
+the script must be executable (`chmod +x`) and start with a shebang (`#!/bin/sh`).
 
-pre-commit, pre-push, commit-msg, prepare-commit-msg, post-commit, post-merge, pre-rebase, post-checkout, post-rewrite, pre-auto-gc, applypatch-msg, pre-applypatch, post-applypatch
+supported hooks: pre-commit, commit-msg, pre-push, prepare-commit-msg, post-commit, post-merge, pre-rebase, post-checkout, post-rewrite, pre-auto-gc, applypatch-msg, pre-applypatch, post-applypatch.
+
+## skipping hooks
+
+for a single command, use git's built-in `--no-verify` flag:
+```
+git commit --no-verify -m "wip"
+git push --no-verify
+```
+
+to disable all hooks for multiple commands:
+```
+GITHOOK_DISABLE=1 git commit -m "skip"
+```
+
+or export it for your session:
+```
+export GITHOOK_DISABLE=1
+git commit -m "first"
+git commit -m "second"
+unset GITHOOK_DISABLE
+```
+
+## ci/cd and docker
+
+hooks are for local development—disable them in CI/CD and containers.
+
+set the environment variable in your CI config:
+```yaml
+# github actions
+env:
+  GITHOOK_DISABLE: 1
+
+# gitlab ci
+variables:
+  GITHOOK_DISABLE: "1"
+```
+
+```dockerfile
+# docker
+ENV GITHOOK_DISABLE=1
+```
+
+or prefix your install command:
+```
+GITHOOK_DISABLE=1 npm install
+```
+
+when `GITHOOK_DISABLE=1` is set, `./.githook.sh install` exits immediately without configuring hooks.
+
+## testing hooks
+
+run your hook directly without making a commit:
+```
+./.githook/pre-commit
+```
+
+to test that hooks block commits properly, add `exit 1`:
+```sh
+#!/bin/sh
+echo "this will block the commit"
+exit 1
+```
+
+a non-zero exit code aborts the git operation. exit 0 (or no exit) allows it to proceed.
+
+## using other languages
+
+hooks can be written in any language. use a shell wrapper:
+```sh
+#!/bin/sh
+node .githook/pre-commit.js
+```
+
+or use a shebang directly (the file must still be executable):
+```python
+#!/usr/bin/env python3
+import subprocess
+import sys
+result = subprocess.run(["pytest", "-x"])
+sys.exit(result.returncode)
+```
+
+```ruby
+#!/usr/bin/env ruby
+system("bundle exec rubocop") || exit(1)
+```
+
+remember: exit with non-zero to block the git operation.
+
+## node version managers
+
+gui clients and ides may not load your shell profile, causing "command not found" errors. source your version manager in the hook:
+
+nvm:
+```sh
+#!/bin/sh
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+npm test
+```
+
+fnm:
+```sh
+#!/bin/sh
+eval "$(fnm env)"
+npm test
+```
+
+volta (usually works without config, but if needed):
+```sh
+#!/bin/sh
+export VOLTA_HOME="$HOME/.volta"
+export PATH="$VOLTA_HOME/bin:$PATH"
+npm test
+```
+
+## common hook examples
+
+**pre-commit** — runs before commit is created. use for linting, formatting, tests:
+```sh
+#!/bin/sh
+npm run lint && npm test
+```
+
+**commit-msg** — validate commit message format. `$1` is the temp file containing the message:
+```sh
+#!/bin/sh
+if ! grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+" "$1"; then
+  echo "error: commit message must follow conventional commits format"
+  echo "example: feat(auth): add login endpoint"
+  exit 1
+fi
+```
+
+**pre-push** — runs before push. use for full test suite or build verification:
+```sh
+#!/bin/sh
+npm run build && npm run test:all
+```
+
+**post-merge** — runs after merge/pull. use to reinstall deps if lockfile changed:
+```sh
+#!/bin/sh
+changed_files=$(git diff-tree -r --name-only ORIG_HEAD HEAD)
+if echo "$changed_files" | grep -q "package-lock.json"; then
+  echo "package-lock.json changed, running npm install..."
+  npm install
+fi
+```
+
+## debugging
+
+enable debug output to see what githook.sh is doing:
+```
+GITHOOK_DEBUG=1 git commit -m "test"
+```
+
+common issues:
+- "command not found" — your PATH isn't set. see the nvm section for fixes.
+- hook not running — check it's executable: `ls -la .githook/`
+- wrong directory — hooks run from repo root. use `cd` if needed.
 
 ## npm/pnpm/bun integration
 
 ```sh
-npm pkg set scripts.prepare="./githook.sh install"
+npm pkg set scripts.prepare="./.githook.sh install"
 ```
 
 this adds a prepare script that runs automatically after install.
@@ -49,7 +210,7 @@ this adds a prepare script that runs automatically after install.
 ## yarn integration
 
 ```sh
-npm pkg set scripts.postinstall="./githook.sh install"
+npm pkg set scripts.postinstall="./.githook.sh install"
 ```
 
 yarn uses postinstall instead of prepare.
@@ -59,24 +220,56 @@ yarn uses postinstall instead of prepare.
 ```makefile
 .PHONY: prepare
 prepare:
-	./githook.sh install
+	./.githook.sh install
 ```
 
 run `make prepare` after cloning to install hooks.
+
+## uninstalling
+
+remove the git configuration (keeps your hook scripts):
+```
+./.githook.sh uninstall
+```
+
+this unsets `core.hooksPath`. your `.githook/` scripts remain so you can reinstall later.
+
+to fully remove everything:
+```
+rm -rf .githook .githook.sh
+```
+
+also remove the prepare script from package.json if you added one.
+
+## how it works
+
+githook.sh uses git's native `core.hooksPath` config to redirect hooks:
+```
+git config core.hooksPath .githook
+```
+
+this tells git to look for hooks in `.githook/` instead of `.git/hooks/`.
+
+benefits:
+- hooks are version-controlled (committed to repo)
+- no symlinks or copying files into .git/
+- works with any project type (not just npm)
+- zero dependencies—just a shell script
+
+each developer must run `./.githook.sh install` once after cloning because git config is local to each clone.
 
 ## environment variables
 
 - `GITHOOK_DISABLE=1` - skips hook execution and installation
 - `GITHOOK_DEBUG=1` - enables verbose debug output
 
-## notes
+## command reference
 
-- each user must run `./githook.sh install` after cloning (hooks are local to each git clone)
-- for npm projects, init auto-adds a "prepare" script to package.json
-- no node.js or npm required
-- single file, copy into repo
-- works with any project type
-- uses posix sh for maximum portability
+- `./.githook.sh init` - initialize githook.sh in repo (downloads, installs, sets up npm if applicable)
+- `./.githook.sh install` - configures git to use .githook/ directory (run once per user)
+- `./.githook.sh uninstall` - removes the hooks configuration
+- `./.githook.sh check` - checks for newer versions
+- `./.githook.sh update` - downloads latest version
 
 ## source
 
@@ -85,11 +278,3 @@ https://github.com/elee1766/githook.sh
 ## license
 
 unlicense (public domain)
-
-## command reference
-
-- `./githook.sh init` - initialize githook.sh in repo (downloads, installs, sets up npm if applicable)
-- `./githook.sh install` - configures git to use .githook/ directory (run once per user)
-- `./githook.sh uninstall` - removes the hooks configuration
-- `./githook.sh check` - checks for newer versions
-- `./githook.sh update` - downloads latest version

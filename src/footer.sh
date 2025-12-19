@@ -1,1 +1,2 @@
-# curl -sSL https://githook.sh | sh
+# to install:
+# curl -sSL https://githook.sh | sh  ->  .githook.sh

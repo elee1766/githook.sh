@@ -5,40 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="a single-file, zero-dependency git hooks manager.">
     <title>githook.sh</title>
-    <style>
-        * { margin: 0; padding: 0; font: inherit; }
-        body { font-family: monospace; padding: 1em; line-height: 1.4; }
-        h1::before { content: "# "; }
-        h2::before { content: "## "; }
-        h2 { margin-top: 1em; }
-        pre { margin-left: 4ch; }
-        a { color: inherit; }
-    </style>
+    <link rel="stylesheet" href="/style.css">
 </head>
 <body>
 <h1>githook.sh</h1>
-<p>a single-file, zero-dependency git hooks manager.</p>
+<p>a single-file, zero-dependency git hooks manager. <a href="/docs">docs</a></p>
 <h2>quick install</h2>
 <pre>curl -sSL https://githook.sh | sh</pre>
 <p>or with wget:</p>
 <pre>wget -qO- https://githook.sh | sh</pre>
 <h2>manual setup</h2>
-<pre>curl -sSL https://githook.sh -o githook.sh
-chmod +x githook.sh
-./githook.sh install</pre>
+<pre>curl -sSL https://githook.sh -o .githook.sh
+chmod +x .githook.sh
+./.githook.sh install</pre>
 <h2>commands</h2>
-<pre>./githook.sh install       set up git hooks (run once per clone)
-./githook.sh uninstall     remove git hooks configuration
-./githook.sh check         check for updates
-./githook.sh update        download latest version</pre>
+<pre>./.githook.sh install       set up git hooks (run once per clone)
+./.githook.sh uninstall     remove git hooks configuration
+./.githook.sh check         check for updates
+./.githook.sh update        download latest version</pre>
 <h2>adding hooks</h2>
 <p>create executable scripts in .githook/ (e.g. .githook/pre-commit)</p>
 <h2>npm/pnpm/bun integration</h2>
-<pre>"prepare": "./githook.sh install"</pre>
+<pre>"prepare": "./.githook.sh install"</pre>
 <h2>makefile integration</h2>
 <pre>.PHONY: prepare
 prepare:
-	./githook.sh install</pre>
+	./.githook.sh install</pre>
 <h2>environment variables</h2>
 <pre>GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)
 GITHOOK_DEBUG=1      show debug output</pre>

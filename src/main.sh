@@ -4,7 +4,7 @@ githook_main() {
     # default: init if not installed, otherwise help
     if [ -z "${1:-}" ]; then
         _git_root="$(git rev-parse --show-toplevel 2>/dev/null || echo "")"
-        if [ -n "$_git_root" ] && [ -f "$_git_root/githook.sh" ]; then
+        if [ -n "$_git_root" ] && [ -f "$_git_root/.githook.sh" ]; then
             _command="help"
         else
             _command="init"
@@ -21,11 +21,11 @@ githook_main() {
         update)    githook_cmd_update ;;
         version)   githook_cmd_version ;;
         help|--help|-h) githook_cmd_help ;;
-        *) githook_error "unknown command: $_command (try ./githook.sh help)" ;;
+        *) githook_error "unknown command: $_command (try ./.githook.sh help)" ;;
     esac
 }
 
 # run if executed directly or piped
 case "${0##*/}" in
-    githook.sh|githook|sh|bash|dash|ash|zsh|ksh) githook_main "$@" ;;
+    .githook.sh|githook.sh|githook|sh|bash|dash|ash|zsh|ksh) githook_main "$@" ;;
 esac

@@ -18,15 +18,19 @@ for more info, go to [githook.sh](https://githook.sh)
 
 ## how it works / what it does
 
-you put a `githook.sh` file in the base of your repo (this is setup by that one liner above).
+you put a `.githook.sh` file in the base of your repo (this is setup by that one liner above).
 
-then you can get people to just run `./githook.sh install`, and it will setup git hooks.
+then you can get people to just run `./.githook.sh install`, and it will setup git hooks.
 
 there is also integration if it sees a package.json, it will try to add a script to your package.json called `prepare` which runs `./githook.sh install`
 
-## goal
+## goals
 
-the idea is that now we can have husky, but for every repo and every language, since it's just a 300 line shell script that exists in the root of your repo that you can hook up to whatever other things you have in your repo
+i really like husky. but i wanted something that i could use in non-javascript repos without introducing npm
+
+other options exist, but they all require you to install some binary in go/rust, and either have this big binary live in your repo, or force everyone to download said binary
+
+so the hope is that with this easy to remember domain and a single-line curl command, we can vendor a tiny shell script with minimal functionality but properly setups and standardizes hooks, like what husky did for js, but for everything.
 
 ## contribution info
 
