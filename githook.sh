@@ -41,27 +41,6 @@ githook_check_git_repository() {
     fi
     git rev-parse --show-toplevel
 }
-
-# figures out the path to this script, even if symlinked
-githook_get_script_path() {
-    if [ -L "$0" ]; then
-        if command -v readlink >/dev/null 2>&1; then
-            readlink -f "$0" 2>/dev/null || {
-                # bsd doesn't have readlink -f
-                _target="$(readlink "$0")"
-                if [ "${_target#/}" = "$_target" ]; then
-                    echo "$(cd "$(dirname "$0")" && pwd)/$_target"
-                else
-                    echo "$_target"
-                fi
-            }
-        else
-            echo "$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
-        fi
-    else
-        echo "$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
-    fi
-}
 # version comparison
 # returns: 0 if equal, 1 if v1 > v2, 2 if v1 < v2
 githook_version_compare() {
@@ -99,30 +78,17 @@ githook_download_file() {
 githook_cmd_init() {
     _git_root="$(githook_check_git_repository)"
     _target_path="$_git_root/githook.sh"
-
-    # check if running from file or piped
-    case "${0##*/}" in
-        sh|bash|dash|ash|zsh|ksh) _piped=1 ;;
-        *) _piped=0 ;;
-    esac
+    case "${0##*/}" in sh|bash|dash|ash|zsh|ksh) _piped=1 ;; *) _piped=0 ;; esac
 
     if [ "$_piped" -eq 0 ]; then
-        _script_path="$(githook_get_script_path)"
-        if [ "$_script_path" = "$_target_path" ]; then
-            githook_info "already in repo root: $_target_path"
-            chmod +x "$_target_path"
-            return
-        fi
+        _script_path="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+        [ "$_script_path" = "$_target_path" ] && githook_info "already in repo root" && chmod +x "$_target_path" && return
     fi
 
     if [ -f "$_target_path" ]; then
         githook_warn "githook.sh already exists in repo root"
-        printf "overwrite? [y/N] "
-        read -r _response
-        case "$_response" in
-            [yY]|[yY][eE][sS]) ;;
-            *) githook_info "cancelled"; return ;;
-        esac
+        printf "overwrite? [y/N] " && read -r _response
+        case "$_response" in [yY]|[yY][eE][sS]) ;; *) githook_info "cancelled"; return ;; esac
     fi
 
     if [ "$_piped" -eq 1 ]; then
@@ -132,127 +98,63 @@ githook_cmd_init() {
         cp "$_script_path" "$_target_path"
     fi
     chmod +x "$_target_path"
-
     githook_info "installed to $_target_path"
-    echo ""
 
-    # run install
     githook_cmd_install
-
-    # try to add npm prepare script if package.json exists
+    echo ""
     if [ -f "$_git_root/package.json" ]; then
-        echo ""
-        if command -v npm >/dev/null 2>&1; then
-            if npm pkg set scripts.prepare="./githook.sh install" 2>/dev/null; then
-                githook_info "added prepare script to package.json"
-            else
-                githook_info "tip: add to package.json scripts: \"prepare\": \"./githook.sh install\""
-            fi
-        else
-            githook_info "tip: add to package.json scripts: \"prepare\": \"./githook.sh install\""
-        fi
+        npm pkg set scripts.prepare="./githook.sh install" 2>/dev/null \
+            && githook_info "added prepare script to package.json" \
+            || githook_info "tip: add to package.json scripts: \"prepare\": \"./githook.sh install\""
     else
-        echo ""
         githook_info "note: each user must run ./githook.sh install after cloning"
     fi
 }
 
 githook_cmd_install() {
-    if githook_is_disabled; then
-        githook_debug "skipping install (GITHOOK_DISABLE is set)"
-        exit 0
-    fi
-
+    githook_is_disabled && githook_debug "skipping install (GITHOOK_DISABLE is set)" && exit 0
     _git_root="$(githook_check_git_repository)"
-    _hooks_dir="$_git_root/$GITHOOK_HOOKS_DIR"
-
     githook_info "installing git hooks..."
 
-    _existing_hooks_path="$(git config core.hooksPath 2>/dev/null || echo "")"
-    if [ -n "$_existing_hooks_path" ] && [ "$_existing_hooks_path" != "$GITHOOK_HOOKS_DIR" ]; then
-        githook_warn "core.hooksPath already set to: $_existing_hooks_path"
-        printf "override with $GITHOOK_HOOKS_DIR? [y/N] "
-        read -r _response
-        case "$_response" in
-            [yY]|[yY][eE][sS]) ;;
-            *) githook_error "cancelled" ;;
-        esac
+    _existing="$(git config core.hooksPath 2>/dev/null || true)"
+    if [ -n "$_existing" ] && [ "$_existing" != "$GITHOOK_HOOKS_DIR" ]; then
+        githook_warn "core.hooksPath already set to: $_existing"
+        printf "override with $GITHOOK_HOOKS_DIR? [y/N] " && read -r _response
+        case "$_response" in [yY]|[yY][eE][sS]) ;; *) githook_error "cancelled" ;; esac
     fi
 
-    [ ! -d "$_hooks_dir" ] && mkdir -p "$_hooks_dir"
-
+    [ ! -d "$_git_root/$GITHOOK_HOOKS_DIR" ] && mkdir -p "$_git_root/$GITHOOK_HOOKS_DIR"
     git config core.hooksPath "$GITHOOK_HOOKS_DIR"
     githook_info "set core.hooksPath=$GITHOOK_HOOKS_DIR"
 }
 
 githook_cmd_uninstall() {
     _git_root="$(githook_check_git_repository)"
-    _hooks_dir="$_git_root/$GITHOOK_HOOKS_DIR"
-
     githook_info "uninstalling..."
-
     git config --unset core.hooksPath 2>/dev/null || true
     githook_info "removed core.hooksPath"
-
-    [ -d "$_hooks_dir" ] && githook_info "kept $GITHOOK_HOOKS_DIR/ (your scripts are still there)"
-
-    echo ""
-    githook_info "done. reinstall with: ./githook.sh install"
+    [ -d "$_git_root/$GITHOOK_HOOKS_DIR" ] && githook_info "kept $GITHOOK_HOOKS_DIR/ (your scripts are still there)"
+    githook_info "reinstall with: ./githook.sh install"
 }
 
 githook_cmd_check() {
     githook_info "checking for updates..."
-
-    _current_version="$GITHOOK_VERSION"
-    githook_info "current: $_current_version"
-
-    if ! _remote_script="$(githook_download_file "$GITHOOK_API_URL" - 2>/dev/null)"; then
-        githook_error "failed to fetch latest version"
-    fi
-
-    _latest_version="$(echo "$_remote_script" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
-
-    # validate version format (X.Y.Z)
-    case "$_latest_version" in
-        *.*.*.*|"") githook_error "invalid remote version: $_latest_version" ;;
-        [0-9]*.[0-9]*.[0-9]*) ;;
-        *) githook_error "invalid remote version: $_latest_version" ;;
-    esac
-
-    githook_info "latest: $_latest_version"
-
-    githook_version_compare "$_current_version" "$_latest_version"
-    _result=$?
-
-    if [ $_result -eq 0 ]; then
-        githook_info "already up to date"
-        exit 0
-    elif [ $_result -eq 1 ]; then
-        githook_info "you're ahead of latest release"
-        exit 0
-    fi
-
-    echo ""
-    githook_info "update available: $_current_version -> $_latest_version"
-    echo ""
-    githook_info "to update, run: ./githook.sh update"
+    githook_info "current: $GITHOOK_VERSION"
+    _remote="$(githook_download_file "$GITHOOK_API_URL" - 2>/dev/null)" || githook_error "failed to fetch latest version"
+    _latest="$(echo "$_remote" | grep '^GITHOOK_VERSION=' | cut -d'"' -f2)"
+    case "$_latest" in [0-9]*.[0-9]*.[0-9]*) ;; *) githook_error "invalid remote version: $_latest" ;; esac
+    githook_info "latest: $_latest"
+    githook_version_compare "$GITHOOK_VERSION" "$_latest"
+    case $? in 0) githook_info "up to date" ;; 1) githook_info "ahead of latest" ;; 2) githook_info "update available! run: ./githook.sh update" ;; esac
 }
 
 githook_cmd_update() {
     _git_root="$(githook_check_git_repository)"
-    _script_path="$_git_root/githook.sh"
-
-    if [ ! -f "$_script_path" ]; then
-        githook_error "githook.sh not found in repo root"
-    fi
-
+    _path="$_git_root/githook.sh"
+    [ ! -f "$_path" ] && githook_error "githook.sh not found in repo root"
     githook_info "updating githook.sh..."
-
-    if ! githook_download_file "$GITHOOK_API_URL" "$_script_path"; then
-        githook_error "failed to download update"
-    fi
-
-    chmod +x "$_script_path"
+    githook_download_file "$GITHOOK_API_URL" "$_path" || githook_error "failed to download update"
+    chmod +x "$_path"
     githook_info "updated successfully"
 }
 
@@ -260,88 +162,39 @@ githook_cmd_version() {
     echo "githook.sh $GITHOOK_VERSION"
 }
 
-githook_cmd_help() {
-    _help='# githook.sh
-
-a single-file, zero-dependency git hooks manager.
+githook_cmd_help() { _h='# githook.sh - a single-file, zero-dependency git hooks manager.
 
 ## quick install
-
-```sh
-curl -sSL https://githook.sh | sh
-```
-
-or with wget:
-
-```sh
-wget -qO- https://githook.sh | sh
-```
+  curl -sSL https://githook.sh | sh
+  wget -qO- https://githook.sh | sh
 
 ## manual setup
-
-```sh
-curl -sSL https://githook.sh -o githook.sh
-chmod +x githook.sh
-./githook.sh install
-```
+  curl -sSL https://githook.sh -o githook.sh
+  chmod +x githook.sh && ./githook.sh install
 
 ## commands
-
-```
-./githook.sh install       set up git hooks (run once per clone)
-./githook.sh uninstall     remove git hooks configuration
-./githook.sh check         check for updates
-./githook.sh update        download latest version
-```
+  install       set up git hooks (run once per clone)
+  uninstall     remove git hooks configuration
+  check         check for updates
+  update        download latest version
 
 ## adding hooks
+  create executable scripts in .githook/ (e.g. .githook/pre-commit)
 
-create executable scripts in .githook/ (e.g. .githook/pre-commit)
+## npm/pnpm/bun
+  npm pkg set scripts.prepare="./githook.sh install"
 
-## npm/pnpm/bun integration
-
-```json
-"prepare": "./githook.sh install"
-```
-
-## makefile integration
-
-```makefile
-.PHONY: prepare
-prepare:
-	./githook.sh install
-```
+## makefile
+  .PHONY: prepare
+  prepare: ; ./githook.sh install
 
 ## environment variables
+  GITHOOK_DISABLE=1  skip hooks (useful for ci)
+  GITHOOK_DEBUG=1    show debug output
 
-```
-GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)
-GITHOOK_DEBUG=1      show debug output
-```
-
-## supported hooks
-
-```
-pre-commit, pre-push, commit-msg, prepare-commit-msg,
-post-commit, post-merge, pre-rebase, post-checkout,
-post-rewrite, pre-auto-gc, applypatch-msg,
-pre-applypatch, post-applypatch
-```
-
-## source
-
-https://github.com/elee1766/githook.sh
-
-## license
-
-unlicense (public domain)'
-
-    if command -v glow >/dev/null 2>&1; then
-        echo "$_help" | glow -s dark -
-    else
-        echo "$_help"
-    fi
-}
+## source & license
+  https://github.com/elee1766/githook.sh (unlicense)'
+if command -v glow >/dev/null 2>&1; then echo "$_h"|glow -s dark -; else echo "$_h"; fi; }
 # main entry point
 
 githook_main() {

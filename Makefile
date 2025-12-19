@@ -1,6 +1,5 @@
 .PHONY: build clean test
 
-# source files in order
 SRC := src/header.sh \
        src/constants.sh \
        src/utils.sh \
