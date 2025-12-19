@@ -38,16 +38,31 @@ chmod +x .githook/pre-commit
 
 pre-commit, pre-push, commit-msg, prepare-commit-msg, post-commit, post-merge, pre-rebase, post-checkout, post-rewrite, pre-auto-gc, applypatch-msg, pre-applypatch, post-applypatch
 
+## npm/pnpm/bun integration
+
+```sh
+npm pkg set scripts.prepare="./githook.sh install"
+```
+
+this adds a prepare script that runs automatically after install.
+
+## yarn integration
+
+```sh
+npm pkg set scripts.postinstall="./githook.sh install"
+```
+
+yarn uses postinstall instead of prepare.
+
 ## makefile integration
 
-for projects using make:
 ```makefile
-.PHONY: init
-init:
+.PHONY: prepare
+prepare:
 	./githook.sh install
 ```
 
-run `make init` after cloning to install hooks.
+run `make prepare` after cloning to install hooks.
 
 ## environment variables
 
@@ -76,4 +91,5 @@ unlicense (public domain)
 - `./githook.sh init` - initialize githook.sh in repo (downloads, installs, sets up npm if applicable)
 - `./githook.sh install` - configures git to use .githook/ directory (run once per user)
 - `./githook.sh uninstall` - removes the hooks configuration
-- `./githook.sh check-update` - checks for newer versions
+- `./githook.sh check` - checks for newer versions
+- `./githook.sh update` - downloads latest version

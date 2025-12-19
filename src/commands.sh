@@ -104,7 +104,7 @@ githook_cmd_uninstall() {
     githook_info "done. reinstall with: ./githook.sh install"
 }
 
-githook_cmd_check_update() {
+githook_cmd_check() {
     githook_info "checking for updates..."
 
     _current_version="$GITHOOK_VERSION"
@@ -134,8 +134,25 @@ githook_cmd_check_update() {
     echo ""
     githook_info "update available: $_current_version -> $_latest_version"
     echo ""
-    githook_info "to update, run:"
-    echo "  curl -fsS $GITHOOK_API_URL -o githook.sh"
+    githook_info "to update, run: ./githook.sh update"
+}
+
+githook_cmd_update() {
+    _git_root="$(githook_check_git_repository)"
+    _script_path="$_git_root/githook.sh"
+
+    if [ ! -f "$_script_path" ]; then
+        githook_error "githook.sh not found in repo root"
+    fi
+
+    githook_info "updating githook.sh..."
+
+    if ! githook_download_file "$GITHOOK_API_URL" "$_script_path"; then
+        githook_error "failed to download update"
+    fi
+
+    chmod +x "$_script_path"
+    githook_info "updated successfully"
 }
 
 githook_cmd_version() {
@@ -143,38 +160,64 @@ githook_cmd_version() {
 }
 
 githook_cmd_help() {
-    cat <<EOF
-githook.sh - git hooks manager
+    cat <<'EOF'
+# githook.sh
 
-usage: ./githook.sh <command> [arguments]
+a single-file, zero-dependency git hooks manager.
 
-commands:
-  init                  initialize githook.sh in repo
-  install               set up git hooks (run once per user)
-  uninstall             remove git hooks config
-  check-update          check for updates
-  version               show version
-  help                  show this
+## quick install
 
-hooks go in .githook/ (e.g. .githook/pre-commit)
+    curl -fsS https://githook.sh | sh
 
-environment:
-  GITHOOK_DISABLE=1    skip hooks/install (for ci)
-  GITHOOK_DEBUG=1      debug output
+or with wget:
 
-npm (package.json):
-  {
-    "scripts": {
-      "prepare": "./githook.sh install"
-    }
-  }
+    wget -qO- https://githook.sh | sh
 
-hooks:
-  pre-commit, pre-push, commit-msg, prepare-commit-msg,
-  post-commit, post-merge, pre-rebase, post-checkout,
-  post-rewrite, pre-auto-gc, applypatch-msg, pre-applypatch,
-  post-applypatch
+## manual setup
 
-https://githook.sh
+    curl -fsS https://githook.sh -o githook.sh
+    chmod +x githook.sh
+    ./githook.sh install
+
+## commands
+
+    ./githook.sh install              set up git hooks (run once per user)
+    ./githook.sh uninstall            remove git hooks configuration
+    ./githook.sh check                check for updates
+    ./githook.sh update               download latest version
+
+## adding hooks
+
+create executable scripts in .githook/ (e.g. .githook/pre-commit)
+
+## npm/pnpm/bun integration
+
+    npm pkg set scripts.prepare="./githook.sh install"
+
+## makefile integration
+
+    .PHONY: prepare
+    prepare:
+    	./githook.sh install
+
+## environment variables
+
+    GITHOOK_DISABLE=1    skip hooks/installation (useful for ci)
+    GITHOOK_DEBUG=1      show debug output
+
+## supported hooks
+
+    pre-commit, pre-push, commit-msg, prepare-commit-msg,
+    post-commit, post-merge, pre-rebase, post-checkout,
+    post-rewrite, pre-auto-gc, applypatch-msg,
+    pre-applypatch, post-applypatch
+
+## source
+
+    https://github.com/elee1766/githook.sh
+
+## license
+
+    unlicense (public domain)
 EOF
 }

@@ -29,18 +29,25 @@ chmod +x githook.sh
 ```
 ./githook.sh install              set up git hooks (run once per user)
 ./githook.sh uninstall            remove git hooks configuration
-./githook.sh check-update         check for updates
+./githook.sh check                check for updates
+./githook.sh update               download latest version
 ```
 
 ## adding hooks
 
 create executable scripts in `.githook/` (e.g. `.githook/pre-commit`)
 
+## npm/pnpm/bun integration
+
+```sh
+npm pkg set scripts.prepare="./githook.sh install"
+```
+
 ## makefile integration
 
 ```makefile
-.PHONY: init
-init:
+.PHONY: prepare
+prepare:
 	./githook.sh install
 ```
 

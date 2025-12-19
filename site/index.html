@@ -27,11 +27,14 @@
 chmod +x githook.sh
 ./githook.sh install</pre>
 <h2>commands</h2>
-<pre>./githook.sh install              set up git hooks (run once per user)
+<pre>./githook.sh install              set up git hooks (run once per clone)
 ./githook.sh uninstall            remove git hooks configuration
-./githook.sh check-update         check for updates</pre>
+./githook.sh check                check for updates
+./githook.sh update               download latest version</pre>
 <h2>adding hooks</h2>
 <p>create executable scripts in .githook/ (e.g. .githook/pre-commit)</p>
+<h2>npm/pnpm/bun integration</h2>
+<pre>npm pkg set scripts.prepare="./githook.sh install"</pre>
 <h2>makefile integration</h2>
 <pre>.PHONY: prepare
 prepare:
