@@ -7,6 +7,7 @@ define(`_HEAD',`<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="$1">
     <title>$2</title>
+    <link rel="icon" href="/favicon.png">
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>')dnl

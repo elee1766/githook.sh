@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="githook.sh logo" width="200">
+</p>
+
 # [githook.sh](https://githook.sh)
 
 git hooks made easier. simple, lightweight[,](https://www.youtube.com/watch?v=P_i1xk07o4g) and portable. inspired by [husky](https://github.com/typicode/husky).

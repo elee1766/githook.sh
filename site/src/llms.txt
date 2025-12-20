@@ -14,10 +14,12 @@ curl -sSL https://githook.sh | sh
 ```
 
 this will:
-1. download .githook.sh (or run install on existing if already present)
-2. configure git hooks
+1. download .githook.sh to current directory (or run install if already present)
+2. configure git to use .githook/ for hooks
 3. migrate hooks from husky if .husky/ exists
 4. add "prepare" script to package.json if present
+
+quick setup is safe to re-run - if .githook.sh already exists, it just runs install.
 
 ## manual setup
 ```
@@ -282,7 +284,11 @@ the structure is:
   ...
 ```
 
-when git runs a hook, it calls the wrapper in `_/`, which sources `~/.config/githook/init.sh` if it exists, checks `GITHOOK=0`, and then runs your script from the parent directory.
+when git runs a hook, it calls the wrapper in `_/`, which:
+1. sources `~/.config/githook/init.sh` if it exists
+2. checks `GITHOOK=0` to skip hooks
+3. adds `node_modules/.bin` to PATH
+4. runs your script from the parent directory
 
 benefits:
 - hooks are version-controlled (committed to repo)
@@ -295,8 +301,8 @@ each developer must run `./.githook.sh install` once after cloning because git c
 ## environment variables
 
 - `GITHOOK=0` - skips hook execution and installation
-- `GITHOOK=2` - enables debug output (set -x)
-- `GITHOOK_DEBUG=1` - enables verbose debug output for githook.sh itself
+- `GITHOOK=2` - enables shell tracing (set -x) in hook scripts for debugging
+- `GITHOOK_DEBUG=1` - enables verbose debug output for githook.sh commands
 
 ## command reference
 

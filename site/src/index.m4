@@ -3,7 +3,7 @@ _HEAD(`git hooks made easier. simple, lightweight, and portable.',`githook.sh')
 <h1>githook.sh</h1>
 <p>git hooks made easier. simple, lightweight, and portable.</p>
 <p>like <a href="https://github.com/typicode/husky">husky</a>, but without npm.</p>
-<p><a href="/docs">docs</a> · <a href="/.githook.sh">view</a></p>
+<p><a href="/docs">docs</a> · <a href="/.githook.sh">view</a> · <a href="/llms.txt">llms.txt</a></p>
 <h2>quick setup</h2>
 _CODE(`curl -sSL https://githook.sh | sh')
 <p>or with wget:</p>
