@@ -3,16 +3,17 @@ document.querySelectorAll('.copy-btn').forEach(btn => {
     const pre = btn.closest('pre');
     const text = pre.textContent.slice(0, -1); // trim button area
     navigator.clipboard.writeText(text);
+    btn.classList.remove('copied');
+    void btn.offsetWidth; // force reflow to restart animation
     btn.classList.add('copied');
-    setTimeout(() => btn.classList.remove('copied'), 1500);
   };
 });
 
-document.querySelectorAll('code').forEach(code => {
-  code.ondblclick = () => {
+document.querySelectorAll('.cmd').forEach(el => {
+  el.ondblclick = () => {
     const sel = window.getSelection();
     const range = document.createRange();
-    range.selectNodeContents(code);
+    range.selectNodeContents(el);
     sel.removeAllRanges();
     sel.addRange(range);
   };

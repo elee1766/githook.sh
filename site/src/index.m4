@@ -20,9 +20,11 @@ _CODE(`./.githook.sh install       set up git hooks (run once per clone)
 ./.githook.sh update        download latest version')
 <h2>adding hooks</h2>
 <p>create executable scripts in .githook/ named after the git hook:</p>
-_CODE(`echo '"'"'#!/bin/sh
-npm test'"'"' > .githook/pre-commit
-chmod +x .githook/pre-commit')
+changequote([,])dnl
+_CODE([echo '#!/bin/sh
+npm test' > .githook/pre-commit
+chmod +x .githook/pre-commit])
+changequote(`,')dnl
 <p>scripts must be executable and start with a shebang.</p>
 <h2>environment variables</h2>
 _CODE(`GITHOOK=0        skip hooks

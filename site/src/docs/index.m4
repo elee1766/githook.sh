@@ -28,9 +28,11 @@ _HEAD(`githook.sh documentation and guides',`githook.sh - docs')
 
 <h2 id="creating">creating a hook</h2>
 <p>add an executable script to <code>.githook/</code> named after the git hook you want:</p>
-_CODE(`echo '"'"'#!/bin/sh
-npm test'"'"' > .githook/pre-commit
-chmod +x .githook/pre-commit')
+changequote([,])dnl
+_CODE([echo '#!/bin/sh
+npm test' > .githook/pre-commit
+chmod +x .githook/pre-commit])
+changequote(`,')dnl
 <p>the script must be executable (<code>chmod +x</code>) and start with a shebang (<code>#!/bin/sh</code>).</p>
 <p>supported hooks: <code>pre-commit</code>, <code>commit-msg</code>, <code>pre-push</code>, <code>prepare-commit-msg</code>, <code>post-commit</code>, <code>post-merge</code>, <code>pre-rebase</code>, <code>post-checkout</code>, <code>post-rewrite</code>, <code>pre-auto-gc</code>, <code>applypatch-msg</code>, <code>pre-applypatch</code>, <code>post-applypatch</code>.</p>
 
@@ -70,7 +72,9 @@ exit 1')
 <p>a non-zero exit code aborts the git operation. exit 0 (or no exit) allows it to proceed.</p>
 
 <h2 id="skipping">skipping hooks</h2>
-<p>for a single command, use git'"'"'s built-in <code>--no-verify</code> flag:</p>
+changequote([,])dnl
+<p>for a single command, use git's built-in <code>--no-verify</code> flag:</p>
+changequote(`,')dnl
 _CODE(`git commit --no-verify -m "wip"
 git push --no-verify')
 <p>to disable all hooks for multiple commands:</p>
@@ -147,7 +151,9 @@ changequote(`,')dnl
 _CODE(`GITHOOK_DEBUG=1 git commit -m "test"')
 <p>common issues:</p>
 <p>• <strong>"command not found"</strong> — see <a href="#nvm">nvm section</a></p>
-<p>• <strong>hook not running</strong> — check it'"'"'s executable: <code>ls -la .githook/</code></p>
+changequote([,])dnl
+<p>• <strong>hook not running</strong> — check it's executable: <code>ls -la .githook/</code></p>
+changequote(`,')dnl
 <p>• <strong>wrong directory</strong> — hooks run from repo root</p>
 
 <h2 id="uninstall">uninstalling</h2>
