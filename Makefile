@@ -18,9 +18,9 @@ $(OUT): $(SRC)
 	@chmod +x $(OUT)
 
 SITE_BASE := site/src/_base.m4
-SITE_STATIC := site/src/style.css site/src/copy.js site/src/llms.txt site/src/favicon.png
+SITE_STATIC := site/src/style.css site/src/copy.js site/src/llms.txt site/src/favicon.png site/src/robots.txt site/src/sitemap.xml
 
-site: site/dist/index.html site/dist/docs/index.html site/dist/style.css site/dist/copy.js site/dist/llms.txt site/dist/favicon.png
+site: site/dist/index.html site/dist/docs/index.html site/dist/style.css site/dist/copy.js site/dist/llms.txt site/dist/favicon.png site/dist/robots.txt site/dist/sitemap.xml
 
 site/dist/index.html: site/src/index.m4 $(SITE_BASE) | site/dist
 	@cd site/src && m4 index.m4 > ../dist/index.html
@@ -38,6 +38,9 @@ site/dist/%.txt: site/src/%.txt | site/dist
 	@cp $< $@
 
 site/dist/%.png: site/src/%.png | site/dist
+	@cp $< $@
+
+site/dist/%.xml: site/src/%.xml | site/dist
 	@cp $< $@
 
 site/dist:

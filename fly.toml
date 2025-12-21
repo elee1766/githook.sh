@@ -17,7 +17,7 @@ primary_region = 'ord'
   auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 1
-  max_machines_running = 2
+  max_machines_running = 6
   auto_assign_hostname = false
 
   [[http_service.checks]]

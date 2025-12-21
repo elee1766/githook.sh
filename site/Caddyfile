@@ -16,6 +16,7 @@
 	handle @script {
 		rewrite * /githook.sh
 		header Content-Type "text/plain; charset=utf-8"
+		header Cache-Control "no-cache"
 		file_server
 	}
 
@@ -33,8 +34,17 @@
 	handle @root {
 		rewrite * /githook.sh
 		header Content-Type "text/plain; charset=utf-8"
+		header Cache-Control "no-cache"
 		file_server
 	}
+
+	# Cache static assets
+	@static path *.css *.js *.png
+	header @static Cache-Control "public, max-age=604800"
+
+	# Cache HTML for 1 hour
+	@html path *.html
+	header @html Cache-Control "public, max-age=3600"
 
 	# Everything else: serve files
 	file_server
