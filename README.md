@@ -48,6 +48,10 @@ ideally we can keep line count down and the api simple so that its not so compli
 
 probably language support is the thing to add.
 
+## license
+
+dual-licensed under [Unlicense](https://unlicense.org/) and [MIT](https://opensource.org/licenses/MIT). choose whichever you prefer.
+
 ## acknowledgements
 
 this is almost all copied from [husky](https://github.com/typicode/husky). again, there is nothing original here.

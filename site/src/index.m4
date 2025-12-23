@@ -35,5 +35,5 @@ _CODE(`./.githook.sh migrate husky')
 <h2>repository</h2>
 <p><a href="https://github.com/elee1766/githook.sh">github.com/elee1766/githook.sh</a></p>
 <h2>license</h2>
-<p><a href="https://unlicense.org/">unlicense</a> (public domain)</p>
+<p>dual-licensed under <a href="https://unlicense.org/">unlicense</a> and <a href="https://opensource.org/licenses/MIT">MIT</a></p>
 _FOOT

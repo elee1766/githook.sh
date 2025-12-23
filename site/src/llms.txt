@@ -336,4 +336,4 @@ https://github.com/elee1766/githook.sh
 
 ## license
 
-unlicense (public domain)
+dual-licensed under unlicense (public domain) and MIT. choose whichever you prefer.

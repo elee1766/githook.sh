@@ -3,7 +3,7 @@
 #
 # git hooks made easier.
 #
-# LICENSE: Unlicense
+# LICENSE: Unlicense OR MIT
 # SITE: https://githook.sh
 # SOURCE: https://github.com/elee1766/githook.sh
 
